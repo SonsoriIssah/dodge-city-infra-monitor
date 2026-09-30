@@ -1,0 +1,99 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Dodge City Infrastructure Monitor</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
+  <link href="https://unpkg.com/maplibre-gl@4.7.1/dist/maplibre-gl.css" rel="stylesheet">
+  <link href="css/style.css" rel="stylesheet">
+</head>
+<body>
+  <header class="topbar">
+    <div class="brand">
+      <div class="logo" aria-hidden="true">
+        <svg viewBox="0 0 24 24" width="22" height="22"><path d="M3 21V9l5-3v15M8 21V4l7 3v14M15 21v-9l6-2v11M2 21h20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"/></svg>
+      </div>
+      <div>
+        <h1>Dodge City Infrastructure Monitor</h1>
+        <p class="sub">3D asset monitoring · IoT telemetry · GeoAI anomaly detection — Dodge City, Kansas</p>
+      </div>
+    </div>
+    <div class="clock">
+      <button id="btn-play" class="icon-btn" title="Play / pause (space)" aria-label="Play">
+        <svg viewBox="0 0 24 24" width="16" height="16"><path id="play-icon" d="M7 4l13 8-13 8z" fill="currentColor"/></svg>
+      </button>
+      <select id="speed" title="Playback speed" aria-label="Playback speed">
+        <option value="400">1×</option><option value="150" selected>3×</option><option value="50">8×</option>
+      </select>
+      <div class="time-readout"><span id="t-date">—</span><span id="t-hour">—</span></div>
+      <span class="badge" id="src-badge">OSM</span>
+    </div>
+  </header>
+
+  <main class="layout">
+    <!-- LEFT: KPIs + layers -->
+    <aside class="panel left" aria-label="Overview and layers">
+      <section class="kpis" id="kpis"></section>
+
+      <section class="card">
+        <h2>Layers</h2>
+        <div class="layer-list" id="layer-list"></div>
+      </section>
+
+      <section class="card">
+        <h2>Buildings coloured by</h2>
+        <div class="seg" id="bldg-mode" role="tablist">
+          <button data-mode="risk" class="on">Risk</button>
+          <button data-mode="condition">Condition</button>
+          <button data-mode="age">Age</button>
+        </div>
+        <label class="row-toggle"><input type="checkbox" id="basemap-sat"> Satellite basemap</label>
+      </section>
+
+      <section class="card">
+        <h2>GeoAI model performance <span class="hint" title="Scored against the faults injected by the IoT simulator">ⓘ</span></h2>
+        <div class="metrics" id="metrics"></div>
+      </section>
+    </aside>
+
+    <!-- MAP -->
+    <section class="map-wrap">
+      <div id="map" aria-label="3D map of Dodge City infrastructure"></div>
+      <div class="legend" id="legend"></div>
+      <div class="view-btns">
+        <button class="icon-btn" id="btn-3d" title="Toggle 2D / 3D">3D</button>
+        <button class="icon-btn" id="btn-home" title="Reset view">
+          <svg viewBox="0 0 24 24" width="16" height="16"><path d="M3 11l9-7 9 7v9h-6v-6H9v6H3z" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/></svg>
+        </button>
+      </div>
+    </section>
+
+    <!-- RIGHT: incidents + detail -->
+    <aside class="panel right" aria-label="Incidents and details">
+      <section class="card detail hidden" id="detail"></section>
+      <section class="card grow">
+        <div class="feed-head">
+          <h2>Incidents <span class="count" id="inc-count"></span></h2>
+          <label class="row-toggle small"><input type="checkbox" id="active-only" checked> Active now</label>
+        </div>
+        <div class="chips" id="type-filter"></div>
+        <ol class="feed" id="feed"></ol>
+      </section>
+    </aside>
+  </main>
+
+  <footer class="timeline">
+    <canvas id="histogram" height="46"></canvas>
+    <input type="range" id="slider" min="0" max="0" value="0" aria-label="Time">
+    <div class="tl-labels" id="tl-labels"></div>
+  </footer>
+
+  <div class="loading" id="loading">Loading data…</div>
+
+  <script src="data/data.js"></script>
+  <script src="https://unpkg.com/maplibre-gl@4.7.1/dist/maplibre-gl.js"></script>
+  <script src="js/app.js"></script>
+</body>
+</html>
