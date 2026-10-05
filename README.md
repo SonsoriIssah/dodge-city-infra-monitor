@@ -535,7 +535,7 @@ source .venv/bin/activate
 
 # Windows (PowerShell)
 py -3.12 -m venv .venv
-.venv\Scripts\Activate.ps1
+.venv\Scripts\Activate.ps1          # if scripts are blocked: Set-ExecutionPolicy -Scope Process RemoteSigned
 ```
 
 **2. Install**
@@ -551,8 +551,9 @@ python -m pip install -e . --no-deps
 cp .env.example .env                # Windows PowerShell: Copy-Item .env.example .env
 ```
 
-Edit `.env` and set `POSTGRES_PASSWORD` to a throwaway value made of letters, digits and `- _ . ~` only. The
-defaults connect to `localhost:5433`. Every variable is described in [section 12](#12-environment-variables).
+Edit `.env` and set `POSTGRES_PASSWORD` to a throwaway value (any characters; wrap it in single quotes if it
+contains `$`, `#` or spaces). The defaults connect to `localhost:5433`. Every variable is described in
+[section 12](#12-environment-variables).
 
 **4. Start PostGIS**
 
@@ -604,7 +605,7 @@ Opening `index.html` from the file system does not work (ES modules need http).
 Two steps from a clean checkout:
 
 ```bash
-cp .env.example .env        # set POSTGRES_PASSWORD (letters, digits, - _ . ~ only)
+cp .env.example .env        # set POSTGRES_PASSWORD (Windows PowerShell: Copy-Item .env.example .env)
 docker compose up --build
 ```
 
@@ -625,12 +626,18 @@ The first start seeds the empty volume from the committed raw data; later starts
 scratch: `docker compose down -v` (deletes the `pgdata` volume) and `docker compose up`. Logs:
 `docker compose logs -f backend`.
 
-**What was verified.** `docker compose up --build` was **not** run in the build environment (pip inside
-`docker build` could not pass that sandbox's TLS-intercepting proxy), so image build time and size are not
-reported here. The entrypoint itself was run on the host against a fresh `postgis/postgis:16-3.4` container: first
-start to `/health` = 200 in 25.3 s (about 8 s waiting for PostGIS to initialise, 14.6 s for the AUTO_SEED pipeline),
-restart without re-seeding 1.6 s, unreachable database -> exit code 2 after the configured attempts. The fresh
-database reproduced the default dataset exactly, and 7 API responses were byte-identical to the committed snapshot.
+**What was verified.** `docker compose up --build` was run end to end on a Windows 11 workstation with Docker
+Desktop (2026-10-05), as a separate compose project with its own empty volume and ports
+(`POSTGRES_HOST_PORT=5544 API_PORT=8044 docker compose -p dcim-verify up -d --build`). The image builds (652 MB; 4 min
+48 s for the first build and start, 14 s for a rebuild from cache), the container runs as the non-root user `app`,
+`.env` is not in the image and the password does not appear in the logs. On the empty volume the backend applied both
+migrations, ran the AUTO_SEED pipeline in 8.0 s and answered `/health` about 10 s after it started;
+`GET /statistics` returned the default dataset of [section 1](#1-project-overview) exactly, and the dashboard was
+walked through in a browser against this container. A restart, and a start against an existing `pgdata` volume, found
+the data and served without re-seeding. Before that, in the build environment, the entrypoint was run on the host
+against a fresh `postgis/postgis:16-3.4` container: first start to `/health` = 200 in 25.3 s, restart without
+re-seeding 1.6 s, unreachable database -> exit code 2 after the configured attempts, and 7 API responses
+byte-identical to the committed snapshot.
 
 Caveat: if the very first start is killed during stage 6 (a window of about 4 s) the next start finds a finished
 detection run and serves without clusters, risk zones and health scores; repair with
@@ -766,7 +773,7 @@ curl -s "http://localhost:8000/sensor-readings?sensor_id=VIB-001&start=2026-10-0
 |---|---|---|---|
 | `python -m pytest -q -m "not db and not slow"` | Unit tests: settings, geo helpers and clipping, OSM/NBI processing on fixtures, placement, simulator determinism and bounds, detectors, events, scoring, explanations, evaluation, health scenarios, risk formula, sources and ingestion validation (httpx `MockTransport`), honesty strings | nothing | 846 passed in 23.7 s |
 | `python -m pytest -q -m "not slow"` | The above + 677 integration tests (marker `db`) | PostGIS | 1,523 passed, 2 deselected in 171 s (with `REQUIRE_DB=1`) |
-| `python -m pytest -q -m slow` | Detection targets on seeds 7 and 123 (no database) | nothing | 2 tests; not re-run for this revision |
+| `python -m pytest -q -m slow` | Detection targets on seeds 7 and 123 (no database) | nothing | 2 passed in 8 s (Windows workstation) |
 | `node --test dashboard/tests` | Frontend modules: data helpers, store, provider, formatting under other time zones, chart, panels, mandatory labels and banned words | Node 22+ | 84 passed |
 | `python -m ruff check .` | Lint | nothing | clean |
 
@@ -942,9 +949,6 @@ reliability).
 
 Open items of this build, beyond the inherent limitations in [section 15](#15-limitations):
 
-- **Docker image not built here.** `docker compose up --build` has not been run end to end in the build
-  environment; the entrypoint was verified on the host ([section 11](#11-docker-setup)). Run it once on a
-  workstation with Docker before relying on it.
 - **GitHub Pages still shows the old prototype** until this branch is merged into `main`.
 - **Snapshot churn:** `detection_runs.finished_at` is wall-clock, so `dashboard/data/snapshot/meta.json` and
   `manifest.json` differ after every pipeline run that includes the export, even when the data is unchanged. All
@@ -957,5 +961,6 @@ Open items of this build, beyond the inherent limitations in [section 15](#15-li
   its geometry; if FHWA corrects the record, a `--refresh` picks it up.
 - **Technical debt:** `pipeline/gis/process.py::process()` is 436 lines long and should be split into per-layer
   functions.
-- **Not re-verified for this revision:** the Windows command variants in this README (the Linux variants were run),
-  the two `slow` tests (seeds 7 and 123), and a full `run_pipeline.py --refresh` against the upstream download services.
+- **Not re-verified for this revision:** a full `run_pipeline.py --refresh` against the upstream download services,
+  and the `docker run` and remote-host commands in [docs/deployment.md](docs/deployment.md). (The Docker Compose
+  path, the Windows PowerShell command variants and the two `slow` tests were run on a Windows 11 workstation.)

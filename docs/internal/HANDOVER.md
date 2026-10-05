@@ -31,7 +31,7 @@ stages unconditionally and would rebuild finished work. Keep them for reference 
 | 7 API + static snapshot (`dashboard/data/snapshot/`, committed) | done; contract tests pass |
 | Dashboard (shell + Assets / Anomalies / Sensors panels + charts) | done; verified in API mode and static mode |
 | Tests | 1,523 pytest tests pass (`-m "not slow"`); 84 node tests pass; ruff clean |
-| Docker: `backend/entrypoint.py`, `backend/Dockerfile`, `backend` service in `docker-compose.yml`, `.dockerignore` | done; entrypoint verified on the host against a fresh PostGIS (seed 25 s, restart 1.6 s, failure exit 2), including a password with special characters; **image build (`docker compose up --build`) not yet run** |
+| Docker: `backend/entrypoint.py`, `backend/Dockerfile`, `backend` service in `docker-compose.yml`, `.dockerignore` | done; entrypoint verified on the host against a fresh PostGIS (seed 25 s, restart 1.6 s, failure exit 2), including a password with special characters; image built and run end to end on the Windows workstation on 2026-10-05 (isolated project on an empty volume: seed 8 s, `/statistics` = default dataset; also against the existing volume without re-seeding) |
 | CI: `.github/workflows/ci.yml` (`pages.yml` untouched) | done; green on GitHub Actions (ruff, 1,523 pytest against PostGIS, 84 node) |
 | `README.md` (20 sections) and `docs/*.md` (6 guides) | done; numbers checked against GET /meta, links checked |
 | Requirements audit and final review | done; status-sentence threshold made visible; `process()` length listed as tech debt; dashboard checked end to end in a browser (API and static mode) |
@@ -82,11 +82,14 @@ CI runs the database tests.
 
 ## What is left
 Owner decisions and checks:
-1. Run `docker compose up --build` once on the workstation (step 5 above) — the image was never built.
+1. Done on the workstation, 2026-10-05: pipeline, 1,523 + 2 slow pytest, 84 node tests, ruff,
+   `docker compose up --build` (isolated project and the default one), browser walk-through at 1366x768 in API mode
+   (served by the container) and static mode, basemap fallback, the README's PowerShell command variants. No code
+   defects found; README and `docs/deployment.md` were updated (Docker verification status, password wording).
 2. Merge PR #1 into `feature/full-stack-prototype`; later merge to `main` (redeploys GitHub Pages with the new
    dashboard) after deleting `docs/internal/`.
-3. Not re-verified: the Windows command variants in the README, the two `slow` tests (`pytest -q -m slow`), and a
-   full `python run_pipeline.py --refresh` against the upstream download services.
+3. Not re-verified: a full `python run_pipeline.py --refresh` against the upstream download services, and the
+   `docker run` / remote-host commands in `docs/deployment.md`.
 
 Optional work, smallest first:
 - CI runs twice per push to a PR branch (`push` and `pull_request`); restrict `push` to `main` and

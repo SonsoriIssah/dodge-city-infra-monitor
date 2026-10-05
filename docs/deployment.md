@@ -11,10 +11,11 @@ Three deployable parts, each usable without the others:
 Local development is described in the [README, section 10](../README.md#10-running-locally); this page covers
 running the parts elsewhere.
 
-**Verification status.** The commands on this page that involve `docker compose up --build`, `docker build` or a
-remote host were not run in the build environment (pip inside `docker build` could not pass that sandbox's
-TLS-intercepting proxy). The container entrypoint was verified on the host against a fresh `postgis/postgis:16-3.4`
-container; the static export and static serving were verified locally. The reverse-proxy snippet is an example.
+**Verification status.** `docker compose up --build` was run end to end on a Windows 11 workstation with Docker
+Desktop, on an empty volume and against an existing one (details in README section 11). The standalone
+`docker build` / `docker run` commands and everything that involves a remote host were not run. The container
+entrypoint was also verified on the host against a fresh `postgis/postgis:16-3.4` container; the static export and
+static serving were verified locally. The reverse-proxy snippet is an example.
 
 ---
 
@@ -72,7 +73,7 @@ everything.
 ```bash
 git clone https://github.com/SonsoriIssah/dodge-city-infra-monitor.git
 cd dodge-city-infra-monitor
-cp .env.example .env            # set POSTGRES_PASSWORD (letters, digits, - _ . ~ only), CORS_ORIGINS, ...
+cp .env.example .env            # set POSTGRES_PASSWORD (any characters), CORS_ORIGINS, ...
 docker compose up -d --build
 docker compose logs -f backend  # wait for the uvicorn start line; the first start seeds the database
 ```
@@ -91,7 +92,8 @@ Start-up sequence of the backend container (`python -m backend.entrypoint`):
 
 Measured with the entrypoint run on the host against a fresh PostGIS container: first start to `/health` = 200 in
 25.3 s (about 8 s waiting for PostGIS to initialise, 14.6 s for the seeding pipeline); a restart with data present
-1.6 s.
+1.6 s. In the container (`docker compose up --build`, Windows 11 workstation, empty volume): seeding pipeline 8.0 s,
+`/health` = 200 about 10 s after the backend container started; a restart served without re-seeding.
 
 Compose details that matter in production:
 
