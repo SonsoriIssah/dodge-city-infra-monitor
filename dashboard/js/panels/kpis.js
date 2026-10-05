@@ -87,6 +87,8 @@ export function mountKpis(elements, { store, data, actions }) {
     sentenceAssets,
     ' · ',
     sentenceAttention,
+    // The threshold is visible, so the count cannot be read against "Assets at Risk" (a lower threshold).
+    ` (derived health score < ${normalBand})`,
   );
   elements.sentence.title = `"Need attention" counts monitored assets whose Derived Asset Health Score is below ${normalBand} at this hour.`;
 
