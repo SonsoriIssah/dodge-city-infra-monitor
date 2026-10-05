@@ -1,0 +1,33 @@
+# Build context of backend/Dockerfile = the repository root. Only what the image needs is sent; the Dockerfile
+# copies explicit paths (data/raw, dashboard, sql, scripts, pipeline, backend, run_pipeline.py, pyproject.toml,
+# README.md, requirements.txt).
+
+# Secrets and local environments
+.env
+.env.*
+.venv*
+
+# Version control, CI and local tooling state
+.git
+.github
+.claude
+
+# Generated data and caches
+data/processed
+data/*.sqlite
+**/__pycache__
+**/*.py[cod]
+**/*.egg-info
+**/.pytest_cache
+**/.ruff_cache
+**/.mypy_cache
+.coverage
+htmlcov
+
+# Not needed at run time
+tests
+dashboard/tests
+docs
+tools
+docker-compose.yml
+backend/Dockerfile

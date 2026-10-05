@@ -1,5 +1,9 @@
 name: dodge-city-infra
 
+# Two-step start:  cp .env.example .env  (set POSTGRES_PASSWORD)  ->  docker compose up --build
+# Dashboard at http://localhost:${API_PORT:-8000}, API docs at /docs. The first start seeds the empty database
+# from the committed data/raw files (AUTO_SEED) before the API answers; later starts reuse the data.
+
 services:
   db:
     image: postgis/postgis:16-3.4
@@ -17,6 +21,68 @@ services:
       interval: 5s
       timeout: 5s
       retries: 20
+
+  backend:
+    build:
+      context: .
+      dockerfile: backend/Dockerfile
+    restart: unless-stopped
+    depends_on:
+      db:
+        condition: service_healthy
+    # No env_file: the container receives only the variables listed here. An empty value means "use the
+    # application default" (see .env.example).
+    environment:
+      # In-network address of the db service, set explicitly so that a host-oriented DATABASE_URL or
+      # POSTGRES_HOST/POSTGRES_PORT in .env never applies inside the container.
+      DATABASE_URL: postgresql://${POSTGRES_USER:-infra}:${POSTGRES_PASSWORD:?Set POSTGRES_PASSWORD in .env (copy .env.example)}@db:5432/${POSTGRES_DB:-infra}
+      # The API listens on 8000 inside the container; API_PORT in .env is the host port it is published on.
+      API_HOST: 0.0.0.0
+      API_PORT: "8000"
+      CORS_ORIGINS: ${CORS_ORIGINS:-}
+      INGEST_API_KEY: ${INGEST_API_KEY:-}
+      SERVE_DASHBOARD: ${SERVE_DASHBOARD:-}
+      AUTO_SEED: ${AUTO_SEED:-}
+      BASEMAP_STYLE_URL: ${BASEMAP_STYLE_URL:-}
+      STUDY_AREA_SLUG: ${STUDY_AREA_SLUG:-}
+      STUDY_AREA_NAME: ${STUDY_AREA_NAME:-}
+      STUDY_AREA_BBOX: ${STUDY_AREA_BBOX:-}
+      STUDY_AREA_UTM_SRID: ${STUDY_AREA_UTM_SRID:-}
+      TIMEZONE: ${TIMEZONE:-}
+      TIGER_PLACE_GEOID: ${TIGER_PLACE_GEOID:-}
+      SENSOR_SOURCE: ${SENSOR_SOURCE:-}
+      HTTP_SOURCE_URL: ${HTTP_SOURCE_URL:-}
+      SIM_SEED: ${SIM_SEED:-}
+      SIM_START: ${SIM_START:-}
+      SIM_DAYS: ${SIM_DAYS:-}
+      SIM_STEP_MINUTES: ${SIM_STEP_MINUTES:-}
+      SIM_ANOMALY_EVENTS: ${SIM_ANOMALY_EVENTS:-}
+      SIM_DROPOUT_RATE: ${SIM_DROPOUT_RATE:-}
+      SIM_WATER_MAINS: ${SIM_WATER_MAINS:-}
+      DETECT_Z_STRONG: ${DETECT_Z_STRONG:-}
+      DETECT_Z_MIN: ${DETECT_Z_MIN:-}
+      DETECT_ROLLING_HOURS: ${DETECT_ROLLING_HOURS:-}
+      DETECT_IFOREST_THRESHOLD: ${DETECT_IFOREST_THRESHOLD:-}
+      DETECT_MERGE_GAP_HOURS: ${DETECT_MERGE_GAP_HOURS:-}
+      PROXIMITY_RADIUS_M: ${PROXIMITY_RADIUS_M:-}
+      CLUSTER_EPS_M: ${CLUSTER_EPS_M:-}
+      CLUSTER_EPS_HOURS: ${CLUSTER_EPS_HOURS:-}
+      CLUSTER_MIN_POINTS: ${CLUSTER_MIN_POINTS:-}
+      CLUSTER_MIN_SENSORS: ${CLUSTER_MIN_SENSORS:-}
+      RISK_HEX_EDGE_M: ${RISK_HEX_EDGE_M:-}
+      RISK_BANDWIDTH_M: ${RISK_BANDWIDTH_M:-}
+      RISK_HALF_LIFE_HOURS: ${RISK_HALF_LIFE_HOURS:-}
+      RISK_REFERENCE: ${RISK_REFERENCE:-}
+      HEALTH_WINDOW_DAYS: ${HEALTH_WINDOW_DAYS:-}
+      HEALTH_HALF_LIFE_HOURS: ${HEALTH_HALF_LIFE_HOURS:-}
+    ports:
+      - "${API_PORT:-8000}:8000"
+    healthcheck:
+      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://127.0.0.1:8000/health', timeout=3)"]
+      interval: 10s
+      timeout: 5s
+      retries: 3
+      start_period: 240s
 
 volumes:
   pgdata:

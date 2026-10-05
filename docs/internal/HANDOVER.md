@@ -31,10 +31,10 @@ launcher, and treat its statements about a running local database as not applyin
 | 7 API + static snapshot (`dashboard/data/snapshot/`, committed) | done; contract tests pass |
 | Dashboard (shell + Assets / Anomalies / Sensors panels + charts) | done; verified in API mode and static mode |
 | Tests | 1,523 pytest tests pass (`-m "not slow"`); 84 node tests pass; ruff clean |
-| **Docker: `backend/entrypoint.py`, `backend/Dockerfile`, `backend` service in `docker-compose.yml`, `.dockerignore`** | **to do** |
-| **CI: `.github/workflows/ci.yml`** (keep `pages.yml` untouched) | **to do** |
-| **`README.md` (still the OLD one) and `docs/*.md`** | **to do** |
-| **Requirements audit and final review** | **to do** |
+| Docker: `backend/entrypoint.py`, `backend/Dockerfile`, `backend` service in `docker-compose.yml`, `.dockerignore` | done; entrypoint verified on the host against a fresh PostGIS (seed 25 s, restart 1.6 s, failure exit 2); **image build (`docker compose up --build`) not yet run** |
+| CI: `.github/workflows/ci.yml` (`pages.yml` untouched) | done; steps emulated locally (ruff, 1,523 pytest, 84 node) — **first GitHub Actions run pending** |
+| `README.md` (20 sections) and `docs/*.md` (6 guides) | done; numbers checked against GET /meta, links checked |
+| Requirements audit and final review | done; status-sentence threshold made visible; `process()` length listed as tech debt; dashboard checked end to end in a browser (API and static mode) |
 
 Default dataset (seed 42) — use these only via the API or the snapshot, never hard-code them in the UI:
 706 assets (678 real + 28 simulated water mains), 112 monitored, 128 sensors, 92,028 readings, 42 anomalies
