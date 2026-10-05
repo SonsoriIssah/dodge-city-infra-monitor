@@ -38,7 +38,7 @@ Requirements: PostgreSQL 16 (other recent versions are likely to work but were n
 
 ```sql
 -- as an administrator
-CREATE ROLE infra LOGIN PASSWORD '<url-safe password>';
+CREATE ROLE infra LOGIN PASSWORD '<password>';
 CREATE DATABASE infra OWNER infra;
 \c infra
 CREATE EXTENSION IF NOT EXISTS postgis WITH SCHEMA public;   -- if the role may not create extensions itself
@@ -95,9 +95,11 @@ Measured with the entrypoint run on the host against a fresh PostGIS container: 
 
 Compose details that matter in production:
 
-- The backend gets `DATABASE_URL=postgresql://${POSTGRES_USER}:${POSTGRES_PASSWORD}@db:5432/${POSTGRES_DB}`
-  explicitly and no `env_file`; only the variables listed in `docker-compose.yml` reach the container (an empty
-  value means "application default"). Hence `POSTGRES_PASSWORD` must be URL-safe.
+- The backend gets the in-network connection explicitly (`POSTGRES_HOST=db`, `POSTGRES_PORT=5432`, the
+  `POSTGRES_DB` / `POSTGRES_USER` / `POSTGRES_PASSWORD` of `.env`, and an empty `DATABASE_URL`) and no `env_file`;
+  only the variables listed in `docker-compose.yml` reach the container (an empty value means "application
+  default"). The connection is built from these parts, not a URL, so the password may contain any character
+  (wrap it in single quotes in `.env` if it contains `$`, `#` or spaces).
 - `API_PORT` in `.env` is the **host** port the container's port 8000 is published on.
 - The `db` port is published on the host (`POSTGRES_HOST_PORT`) for development. On a server, remove that `ports:`
   entry or bind it to `127.0.0.1` so that the database is not reachable from outside.
@@ -213,7 +215,7 @@ system does not work (browsers block ES modules on `file:`); the page says so.
 
 ## 4. Checklist for a demo deployment
 
-1. Database and backend: `docker compose up -d --build` on a host with a URL-safe `POSTGRES_PASSWORD`; database port
+1. Database and backend: `docker compose up -d --build` on a host with a strong `POSTGRES_PASSWORD`; database port
    not exposed publicly.
 2. HTTPS reverse proxy to port 8000; `CORS_ORIGINS` set to the dashboard origin.
 3. `curl -s https://api.example.org/health` answers `"status":"ok"`, `"database":"ok"` and the data window.

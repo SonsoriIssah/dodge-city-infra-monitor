@@ -616,7 +616,7 @@ How it works:
 | Piece | What it does |
 |---|---|
 | `db` service | `postgis/postgis:16-3.4`, named volume `pgdata`, healthcheck `pg_isready`, published on `${POSTGRES_HOST_PORT:-5433}` |
-| `backend` service | Built from `backend/Dockerfile` (context = repo root); waits for `db` to be healthy; `DATABASE_URL` is set explicitly to `postgresql://${POSTGRES_USER}:${POSTGRES_PASSWORD}@db:5432/${POSTGRES_DB}` (no `env_file`, so host-oriented values in `.env` never apply inside the container); listens on 8000 inside the container; healthcheck on `/health` (interval 10 s, start period 240 s); `restart: unless-stopped` |
+| `backend` service | Built from `backend/Dockerfile` (context = repo root); waits for `db` to be healthy; the connection is set explicitly to the in-network address (`POSTGRES_HOST=db`, `POSTGRES_PORT=5432`, `DATABASE_URL` empty; no `env_file`, so host-oriented values in `.env` never apply inside the container); listens on 8000 inside the container; healthcheck on `/health` (interval 10 s, start period 240 s); `restart: unless-stopped` |
 | `backend/Dockerfile` | `python:3.12-slim`, `pip install -r requirements.txt` then `pip install -e . --no-deps`, COPY-only (no bind mounts): `data/raw`, `dashboard` (with the snapshot), `sql`, `scripts`, `pipeline`, `backend`; runs as non-root user `app` (uid 10001) |
 | `backend/entrypoint.py` | `python -m backend.entrypoint`: waits for the database (30 attempts x 2 s by default, `--wait-attempts` / `--wait-interval`; exit code 2 with a clear message if it never answers), applies the migrations under a PostgreSQL advisory lock, runs the pipeline in-process (`--skip-download --skip-export`) when `AUTO_SEED=true` and `infra.detection_runs` has no finished row, then replaces itself with uvicorn. The password is never logged |
 | `.dockerignore` | Keeps `.env*`, `.venv*`, `.git`, `.github`, `data/processed`, `tests`, `dashboard/tests`, `docs`, `tools` and caches out of the build context |
@@ -632,9 +632,8 @@ start to `/health` = 200 in 25.3 s (about 8 s waiting for PostGIS to initialise,
 restart without re-seeding 1.6 s, unreachable database -> exit code 2 after the configured attempts. The fresh
 database reproduced the default dataset exactly, and 7 API responses were byte-identical to the committed snapshot.
 
-Caveats: `POSTGRES_PASSWORD` must be URL-safe because compose embeds it in `DATABASE_URL`. If the very first start
-is killed during stage 6 (a window of about 4 s) the next start finds a finished detection run and serves without
-clusters, risk zones and health scores; repair with
+Caveat: if the very first start is killed during stage 6 (a window of about 4 s) the next start finds a finished
+detection run and serves without clusters, risk zones and health scores; repair with
 `docker compose exec backend python run_pipeline.py --only analyze`.
 
 ---
@@ -652,7 +651,7 @@ override the file, and an empty value means "use the default". `.env.example` do
 | `POSTGRES_HOST_PORT` | `5433` | Host port compose publishes the `db` service on (compose only) |
 | `POSTGRES_DB` | `infra` | Database name |
 | `POSTGRES_USER` | `infra` | Database role |
-| `POSTGRES_PASSWORD` | *(empty; `.env.example`: `change-me`)* | Password. Required by compose; URL-safe characters only |
+| `POSTGRES_PASSWORD` | *(empty; `.env.example`: `change-me`)* | Password. Required by compose; any characters (wrap the value in single quotes if it contains `$`, `#` or spaces) |
 | `TEST_DATABASE_URL` | *(empty)* | Database of the integration tests; empty = the connection above with database `infra_test` |
 | `STUDY_AREA_SLUG` | `dodge-city-downtown` | Study-area identifier |
 | `STUDY_AREA_NAME` | `Downtown Dodge City, Kansas` | Display name |
@@ -946,13 +945,10 @@ Open items of this build, beyond the inherent limitations in [section 15](#15-li
 - **Docker image not built here.** `docker compose up --build` has not been run end to end in the build
   environment; the entrypoint was verified on the host ([section 11](#11-docker-setup)). Run it once on a
   workstation with Docker before relying on it.
-- **CI not yet run on GitHub.** `.github/workflows/ci.yml` has not run on GitHub Actions; its steps were emulated
-  locally (ruff clean, 1,523 pytest passed, 84 node tests passed).
 - **GitHub Pages still shows the old prototype** until this branch is merged into `main`.
 - **Snapshot churn:** `detection_runs.finished_at` is wall-clock, so `dashboard/data/snapshot/meta.json` and
   `manifest.json` differ after every pipeline run that includes the export, even when the data is unchanged. All
   other snapshot files are byte-stable.
-- **`POSTGRES_PASSWORD` must be URL-safe** under compose (letters, digits, `- _ . ~`).
 - **Interrupted first seed:** a container start killed during stage 6 leaves a finished detection run without
   clusters, risk zones and health; fix with `python run_pipeline.py --only analyze`.
 - **Three LiDAR heights are wrong** for the building they describe ([section 5](#5-data-provenance)); they are

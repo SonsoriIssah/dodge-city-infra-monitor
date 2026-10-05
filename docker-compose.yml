@@ -34,8 +34,14 @@ services:
     # application default" (see .env.example).
     environment:
       # In-network address of the db service, set explicitly so that a host-oriented DATABASE_URL or
-      # POSTGRES_HOST/POSTGRES_PORT in .env never applies inside the container.
-      DATABASE_URL: postgresql://${POSTGRES_USER:-infra}:${POSTGRES_PASSWORD:?Set POSTGRES_PASSWORD in .env (copy .env.example)}@db:5432/${POSTGRES_DB:-infra}
+      # POSTGRES_HOST/POSTGRES_PORT in .env never applies inside the container. DATABASE_URL is empty on purpose:
+      # the connection is built from these parts (not a URL), so the password may contain any character.
+      DATABASE_URL: ""
+      POSTGRES_HOST: db
+      POSTGRES_PORT: "5432"
+      POSTGRES_DB: ${POSTGRES_DB:-infra}
+      POSTGRES_USER: ${POSTGRES_USER:-infra}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?Set POSTGRES_PASSWORD in .env (copy .env.example)}
       # The API listens on 8000 inside the container; API_PORT in .env is the host port it is published on.
       API_HOST: 0.0.0.0
       API_PORT: "8000"

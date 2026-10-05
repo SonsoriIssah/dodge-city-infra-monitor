@@ -9,17 +9,17 @@ GIS data → PostGIS → Python pipeline → simulated sensors → anomaly detec
    (Amendments) overrides earlier text;
 3. `docs/internal/requirements.md` — the requirements checklist R1–R23 and the final-output list (acceptance standard).
 
-`docs/internal/stage-prompts.js` holds the detailed task descriptions for the stages below (`BUILD_DOCKER`,
-`BUILD_DOCS`). It was written for a Windows workstation: ignore its absolute paths and the `.venv/Scripts/python.exe`
-launcher, and treat its statements about a running local database as not applying here.
+**All build stages are finished.** This file supersedes `.claude/build/STATUS.md` on the workstation. Do not run
+`docs/internal/stage-prompts.js` or `.claude/build/workflows/build-remaining.js` again: the workflow runs all four
+stages unconditionally and would rebuild finished work. Keep them for reference only.
 
 ## Ground rules
 - Data honesty is the core requirement. Simulated is never presented as real. The labels "Simulated Sensor Data",
   "Prototype Anomaly Detection" and "Derived Asset Health Score" are mandatory; the words "live" and "real-time" are
   not used to describe this system. Real attributes come only from OpenStreetMap tags and FHWA National Bridge
   Inventory fields. Isolation Forest wording follows amendment A5.
-- Push only to `feature/full-stack-prototype`. Do not merge, open a pull request, push to `main` or deploy unless the
-  owner asks. Never commit credentials; `.env` is git-ignored and `.env.example` holds placeholders only.
+- Work on `feature/full-stack-prototype`. Do not merge to `main`, push to `main` or deploy unless the owner asks.
+  Never commit credentials; `.env` is git-ignored and `.env.example` holds placeholders only.
 - Work sequentially and economically; verify what you write by running it.
 
 ## State of the build
@@ -31,8 +31,8 @@ launcher, and treat its statements about a running local database as not applyin
 | 7 API + static snapshot (`dashboard/data/snapshot/`, committed) | done; contract tests pass |
 | Dashboard (shell + Assets / Anomalies / Sensors panels + charts) | done; verified in API mode and static mode |
 | Tests | 1,523 pytest tests pass (`-m "not slow"`); 84 node tests pass; ruff clean |
-| Docker: `backend/entrypoint.py`, `backend/Dockerfile`, `backend` service in `docker-compose.yml`, `.dockerignore` | done; entrypoint verified on the host against a fresh PostGIS (seed 25 s, restart 1.6 s, failure exit 2); **image build (`docker compose up --build`) not yet run** |
-| CI: `.github/workflows/ci.yml` (`pages.yml` untouched) | done; steps emulated locally (ruff, 1,523 pytest, 84 node) — **first GitHub Actions run pending** |
+| Docker: `backend/entrypoint.py`, `backend/Dockerfile`, `backend` service in `docker-compose.yml`, `.dockerignore` | done; entrypoint verified on the host against a fresh PostGIS (seed 25 s, restart 1.6 s, failure exit 2), including a password with special characters; **image build (`docker compose up --build`) not yet run** |
+| CI: `.github/workflows/ci.yml` (`pages.yml` untouched) | done; green on GitHub Actions (ruff, 1,523 pytest against PostGIS, 84 node) |
 | `README.md` (20 sections) and `docs/*.md` (6 guides) | done; numbers checked against GET /meta, links checked |
 | Requirements audit and final review | done; status-sentence threshold made visible; `process()` length listed as tech debt; dashboard checked end to end in a browser (API and static mode) |
 
@@ -43,43 +43,57 @@ Default dataset (seed 42) — use these only via the API or the snapshot, never 
 estimated. Detection self-check on the simulated ground truth: recall 40/40, precision 0.952 (2 false, both low).
 All of these are in `dashboard/data/snapshot/meta.json` and `playback.json` without needing a database.
 
-## Environment setup in a fresh checkout
-```bash
-python3.12 -m venv .venv && . .venv/bin/activate
-pip install -r requirements-dev.txt && pip install -e . --no-deps
-cp .env.example .env            # then set POSTGRES_PASSWORD to a throwaway value
-```
-PostGIS, in order of preference:
-1. Docker available → `docker compose up -d db` (host port 5433), then `python run_pipeline.py --skip-download`.
-2. No Docker but packages can be installed → install PostgreSQL + PostGIS, create a superuser role and database
-   matching `.env`, set `DATABASE_URL` / `TEST_DATABASE_URL`, then run the pipeline.
-3. Neither → run `pytest -q -m "not db and not slow"` (712 tests, no database needed) and `node --test dashboard/tests`,
-   and rely on the GitHub Actions run of `ci.yml` (PostGIS service container) for the database tests: push, then
-   read the run with `gh run list` / `gh run view --log-failed`.
-Say plainly in the final report which of these was possible and what therefore remains unverified.
+## Continuing on the Windows workstation
+The Docker/CI, docs and review work was done in a cloud session on branch `claude/vibrant-gates-1wsc1f`
+(pull request #1 into `feature/full-stack-prototype`).
 
-## Remaining work, in order
-1. **Docker + CI** (contract §13; `BUILD_DOCKER` in `stage-prompts.js`). Entrypoint: wait for the database, apply
-   migrations, when `AUTO_SEED=true` and no finished detection run exists run the pipeline in-process
-   (`--skip-download --skip-export`), then start uvicorn (`backend.app.main:create_app --factory`). Compose `backend`
-   service sets `DATABASE_URL` explicitly to the in-network address (`@db:5432`) and does not use `env_file`.
-   CI: ruff + pytest with `REQUIRE_DB=1` against `postgis/postgis:16-3.4` + node tests. Push and make the CI run green.
-2. **README + docs** (contract §13 and A5; `BUILD_DOCS` in `stage-prompts.js`). README headings are exactly the 16
-   titles of requirement R18, numbered 1–16 in order, then 17 Deployment, 18 What was reused (old path → new path),
-   19 What is new, 20 Remaining limitations; Mermaid architecture diagram; `docs/{data-provenance,health-score,
-   anomaly-detection,api,deployment,real-sensor-integration}.md`. Every command, path, endpoint, variable and number
-   must be true — take them from the code, `pipeline/config.py`, `.env.example` and `meta.json`.
-3. **Requirements audit** against `requirements.md` R1–R23 + final-output list; fix what is missing. Known items:
-   - `pipeline/gis/process.py::process()` is ~430 lines — split it if time allows, otherwise list it as tech debt.
-   - The status sentence says "K assets need attention" (health < 90) next to the KPI "Assets at Risk" (health < 70):
-     make sure the wording cannot be read as a contradiction.
-   - Three LiDAR heights do not describe the building (see `tools/README.md`) — must appear in README limitations.
-   - `detection_runs.finished_at` is wall-clock, so `meta.json` and `manifest.json` change on every pipeline run (A2).
-   - The US-56 NBI record with mismatched coordinates is deliberately excluded (documented in the processing report).
-4. **Leave for the owner's workstation** (needs local Docker and a browser) and list as exact commands in the final
-   report: `docker compose up --build` from a clean `.env`, then open http://localhost:8000 and walk through the
-   dashboard; `pytest -q -m "not slow"`; `node --test dashboard/tests`.
-5. **Final report** in plain language: what works and how it was verified, what could not be verified here, how to
-   run it, what was reused from the original repository, what is new, remaining limitations, and the decisions that
-   are the owner's: merge to `main` (which redeploys GitHub Pages with the new dashboard), and removal of
-   `docs/internal/`.
+1. **Get the work.** Check `git status` first (commit or set aside local changes). If PR #1 is merged:
+   `git checkout feature/full-stack-prototype` then `git pull`. If not:
+   `git fetch origin` then `git checkout feature/full-stack-prototype` then
+   `git merge --ff-only origin/claude/vibrant-gates-1wsc1f`.
+2. **Replace the old status file** so a local session does not redo finished stages (Git Bash):
+   `cp docs/internal/HANDOVER.md .claude/build/STATUS.md`
+3. **Nothing to reinstall or reseed.** Requirements, migrations (`001`, `002`), pipeline code and the committed
+   snapshot did not change, so the existing `.venv`, `.env` and the `dodge-city-infra_pgdata` volume keep working.
+   On this machine `python`/`py` on PATH are broken: use `.venv/Scripts/python.exe`.
+4. **`.env`:** no change needed. `POSTGRES_PASSWORD` may contain any character; wrap it in single quotes if it
+   contains `$`, `#` or spaces. Compose passes the connection to the backend as separate parts, not a URL.
+5. **First checks:**
+   - `.venv/Scripts/python.exe -m pytest -q -m "not slow"` → expect 1,523 passed (needs the db container).
+   - `node --test dashboard/tests` → expect 84 passed.
+   - `docker compose up --build` → open http://localhost:8000. Against the existing volume the backend logs
+     "data present ... AUTO_SEED not needed" and serves at once. Stop any uvicorn already on port 8000, or set
+     `API_PORT`. For a from-scratch check without touching the volume:
+     `POSTGRES_HOST_PORT=5544 API_PORT=8044 docker compose -p dcim-verify up --build`, open http://localhost:8044
+     (first start seeds for about 25 s), then `docker compose -p dcim-verify down -v`.
+
+## Environment setup in a fresh checkout (any machine)
+```bash
+python3.12 -m venv .venv            # Windows: py -3.12 -m venv .venv
+. .venv/bin/activate                # Windows PowerShell: .venv\Scripts\Activate.ps1
+pip install -r requirements-dev.txt && pip install -e . --no-deps
+cp .env.example .env                # then set POSTGRES_PASSWORD
+docker compose up -d db             # PostGIS on host port 5433
+python run_pipeline.py --skip-download
+```
+Without Docker: install PostgreSQL 16 + PostGIS 3.4, create a role and database matching `.env`, then run the
+pipeline. Without any database: `pytest -q -m "not db and not slow"` (846 tests) and `node --test dashboard/tests`;
+CI runs the database tests.
+
+## What is left
+Owner decisions and checks:
+1. Run `docker compose up --build` once on the workstation (step 5 above) — the image was never built.
+2. Merge PR #1 into `feature/full-stack-prototype`; later merge to `main` (redeploys GitHub Pages with the new
+   dashboard) after deleting `docs/internal/`.
+3. Not re-verified: the Windows command variants in the README, the two `slow` tests (`pytest -q -m slow`), and a
+   full `python run_pipeline.py --refresh` against the upstream download services.
+
+Optional work, smallest first:
+- CI runs twice per push to a PR branch (`push` and `pull_request`); restrict `push` to `main` and
+  `feature/full-stack-prototype` if Actions minutes matter.
+- A pytest module for `backend/entrypoint.py` (verified end to end by hand only).
+- Split `pipeline/gis/process.py::process()` (~436 lines) into per-layer functions.
+- Automate the repair of an interrupted first seed (today: `python run_pipeline.py --only analyze`).
+
+Known and documented, not open work: README sections 15 and 20 (simulated data, retrospective detection, the
+three wrong LiDAR heights, the excluded US-56 NBI record, `meta.json`/`manifest.json` churn per amendment A2).
