@@ -1,11 +1,12 @@
 /*
  * Runtime configuration of the dashboard (static hosting, e.g. GitHub Pages).
  *
- *   mode             'auto'    probe `${apiBaseUrl}/health` for 3 s; use the API when it answers as the
+ *   mode             'static'  always the snapshot under ./data/snapshot (the default here: a static host has no
+ *                              API, and probing for one would log a 404 in the browser console)
+ *                    'auto'    probe `${apiBaseUrl}/health` for 3 s; use the API when it answers as the
  *                              monitoring service with status "ok", otherwise the static snapshot
  *                    'api'     always the API; when it does not answer the page shows an error with
  *                              "Retry" and "Use static snapshot"
- *                    'static'  always the snapshot under ./data/snapshot
  *                    The URL parameter ?mode=static or ?mode=api overrides this value.
  *   apiBaseUrl       ''        same origin (relative URLs); or e.g. 'https://api.example.org' (the API must
  *                              allow this page's origin in CORS_ORIGINS)
@@ -16,7 +17,7 @@
  * so this file is only used on static hosts.
  */
 window.DCIM_CONFIG = {
-  mode: 'auto',
+  mode: 'static',
   apiBaseUrl: '',
   basemapStyleUrl: 'https://tiles.openfreemap.org/styles/dark',
 };

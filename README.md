@@ -594,8 +594,9 @@ python -m uvicorn backend.app.main:create_app --factory --host 127.0.0.1 --port 
 python -m http.server -d dashboard 8080
 ```
 
-Open http://localhost:8080/. `dashboard/config.js` has `mode: 'auto'`: the page probes `./health` for 3 s and, when
-no monitoring API answers, loads `data/snapshot/`. Add `?mode=static` or `?mode=api` to the URL to force a mode.
+Open http://localhost:8080/. `dashboard/config.js` has `mode: 'static'`: the page loads `data/snapshot/` without
+looking for an API. Add `?mode=api` to the URL to force the API instead, or set `mode: 'auto'` in the file to probe
+`./health` for 3 s and fall back to the snapshot when no monitoring API answers.
 Opening `index.html` from the file system does not work (ES modules need http).
 
 ---
@@ -886,7 +887,8 @@ only after this branch is merged. To refresh the snapshot after a pipeline chang
 `meta.json` (`detection_run.finished_at`) and `manifest.json` change on every pipeline run because the run's finish
 time is wall-clock.
 
-To point the published dashboard at a deployed API, edit `dashboard/config.js`:
+The committed `dashboard/config.js` uses `mode: 'static'`, so the published page reads the snapshot and makes no API
+request. To point it at a deployed API, edit that file:
 `window.DCIM_CONFIG = {mode: 'auto', apiBaseUrl: 'https://api.example.org', ...}` (`auto` falls back to the snapshot
 when the API does not answer; `api` shows an error with "Retry" and "Use static snapshot" instead).
 

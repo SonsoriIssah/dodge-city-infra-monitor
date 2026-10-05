@@ -166,7 +166,7 @@ described here appears there only after this branch is merged.
 
 ```js
 window.DCIM_CONFIG = {
-  mode: 'auto',
+  mode: 'static',
   apiBaseUrl: '',
   basemapStyleUrl: 'https://tiles.openfreemap.org/styles/dark',
 };
@@ -174,16 +174,18 @@ window.DCIM_CONFIG = {
 
 | `mode` | Behaviour |
 |---|---|
-| `auto` (default) | Probes `${apiBaseUrl}/health` for 3 s and uses the API only when it answers HTTP 200 as `dodge-city-infra-monitor` with `status: "ok"`; otherwise loads `./data/snapshot/` |
+| `static` (committed default) | Always the snapshot under `./data/snapshot/`; no API request is made |
+| `auto` | Probes `${apiBaseUrl}/health` for 3 s and uses the API only when it answers HTTP 200 as `dodge-city-infra-monitor` with `status: "ok"`; otherwise loads `./data/snapshot/` |
 | `api` | Always the API; when it does not answer, an error state with "Retry" and "Use static snapshot" (never a silent switch) |
-| `static` | Always the snapshot |
 
 The URL parameter `?mode=static` or `?mode=api` overrides the file. All URLs are relative, so the Pages sub-path
-works. On Pages with the default file, `./health` does not exist and the page runs from the snapshot; the source
-badge reads "Source: static snapshot (exported <date>)".
+works. On Pages with the committed file the page runs from the snapshot and the source badge reads
+"Source: static snapshot (exported <date>)". The default is `static` rather than `auto` because a static host has no
+`./health`, and probing for it would log a 404 in the visitor's browser console. When the FastAPI service serves the
+dashboard it answers `/config.js` itself with `mode: 'api'`, so this file does not apply there.
 
-To make the published page use a deployed backend, set `apiBaseUrl: 'https://api.example.org'` (keep `mode: 'auto'`
-for a fallback to the snapshot) and add the Pages origin to the backend's `CORS_ORIGINS`.
+To make the published page use a deployed backend, set `mode: 'auto'` (for a fallback to the snapshot) and
+`apiBaseUrl: 'https://api.example.org'`, and add the Pages origin to the backend's `CORS_ORIGINS`.
 
 ### The committed snapshot
 

@@ -110,7 +110,7 @@ def test_config_js_is_the_api_route_with_mode_api(served):
         "basemapStyleUrl": support.SPEC_DEFAULTS["BASEMAP_STYLE_URL"],
     }
     static_file = (DASHBOARD_DIR / "config.js").read_text(encoding="utf-8")
-    assert "mode: 'auto'" in static_file and response.text != static_file  # the route shadows the static file
+    assert "mode: 'static'" in static_file and response.text != static_file  # the route shadows the static file
     assert "no-cache" in response.headers["cache-control"]
 
 
