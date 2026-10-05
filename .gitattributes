@@ -1,0 +1,6 @@
+# Normalise line endings to LF everywhere (shell entrypoints and SQL must not arrive as CRLF in the container).
+* text=auto eol=lf
+
+# Downloaded source data and vendored libraries are stored byte for byte (their sha256 is recorded).
+data/raw/** -text
+dashboard/vendor/** -text

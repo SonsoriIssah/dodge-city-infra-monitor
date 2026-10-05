@@ -1,0 +1,41 @@
+{
+ "description": "Provenance of the hand-made test fixture.",
+ "sources": [
+  {
+   "source_id": "osm",
+   "file": "osm.json",
+   "url": "https://example.invalid/overpass",
+   "retrieved_at": "2025-07-01T00:00:00Z",
+   "sha256": null,
+   "feature_count": 30,
+   "license": "test fixture",
+   "attribution_text": "test fixture",
+   "vintage": "2025-06-30T00:00:00Z",
+   "terms_url": null
+  },
+  {
+   "source_id": "nbi",
+   "file": "nbi_bridges.json",
+   "url": "https://example.invalid/nbi",
+   "retrieved_at": "2025-07-01T00:00:00Z",
+   "sha256": null,
+   "feature_count": 6,
+   "license": "test fixture",
+   "attribution_text": "FHWA National Bridge Inventory (data as of June 20, 2025), distributed by USDOT/BTS NTAD",
+   "vintage": "data as of June 20, 2025",
+   "terms_url": null
+  },
+  {
+   "source_id": "tiger",
+   "file": "city_boundary.geojson",
+   "url": "https://example.invalid/tiger",
+   "retrieved_at": "2025-07-01T00:00:00Z",
+   "sha256": null,
+   "feature_count": 1,
+   "license": "test fixture",
+   "attribution_text": "U.S. Census Bureau, TIGERweb",
+   "vintage": "fixture vintage",
+   "terms_url": null
+  }
+ ]
+}

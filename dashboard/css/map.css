@@ -1,0 +1,588 @@
+/*
+ * Map zone: the MapLibre canvas and everything laid over it - "Layers & legend" card (top left), compact
+ * legend (bottom left), view buttons (top right), basemap notice, hover tooltip, "How to read this dashboard"
+ * card and the persistent watermark (bottom centre).
+ */
+.map {
+  position: absolute;
+  inset: 0;
+}
+
+.map-skeleton {
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  display: grid;
+  place-items: center;
+  background:
+    linear-gradient(var(--line) 1px, transparent 1px) 0 0 / 48px 48px,
+    linear-gradient(90deg, var(--line) 1px, transparent 1px) 0 0 / 48px 48px,
+    var(--bg);
+  color: var(--muted);
+  font-size: var(--fs-body);
+}
+
+.map-skeleton__box {
+  background: var(--overlay);
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  padding: 10px 14px;
+  max-width: min(420px, calc(100% - 24px));
+}
+
+.map-overlay {
+  position: absolute;
+  z-index: 3;
+}
+
+/* ---- Layers & legend card (top left) ------------------------------------------------------------------ */
+.layers-card {
+  left: 12px;
+  top: 12px;
+  width: 292px;
+  max-width: calc(100% - 24px);
+  max-height: calc(100% - 24px);
+  display: flex;
+  flex-direction: column;
+  background: var(--overlay);
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  backdrop-filter: blur(6px);
+  box-shadow: var(--shadow);
+}
+
+.layers-card[data-open='false'] {
+  width: auto;
+  box-shadow: none;
+}
+
+.layers-card__toggle {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  width: 100%;
+  height: 34px;
+  padding: 0 10px;
+  background: transparent;
+  border: 0;
+  border-radius: var(--radius);
+  font-size: var(--fs-min);
+  font-weight: 600;
+  text-align: left;
+  white-space: nowrap;
+}
+
+.layers-card__toggle:hover {
+  background: var(--card-hover);
+}
+
+.layers-card__toggle .chevron {
+  margin-left: auto;
+  transition: transform 0.12s ease;
+}
+
+.layers-card[data-open='true'] .layers-card__toggle .chevron {
+  transform: rotate(180deg);
+}
+
+.layers-card__body {
+  overflow-y: auto;
+  padding: 2px 10px 10px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  border-top: 1px solid var(--line);
+}
+
+.layer-group {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  padding-top: 8px;
+}
+
+.layer-group__title {
+  font-size: var(--fs-min);
+  font-weight: 700;
+  color: var(--text);
+  line-height: 1.35;
+  margin-bottom: 2px;
+}
+
+.layer-group__note {
+  font-size: var(--fs-min);
+  color: var(--muted);
+  line-height: 1.4;
+}
+
+.layer-toggle {
+  display: grid;
+  grid-template-columns: auto 16px minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 7px;
+  min-height: 24px;
+  padding: 1px 4px;
+  border-radius: 5px;
+  font-size: var(--fs-min);
+  cursor: pointer;
+}
+
+.layer-toggle:hover {
+  background: var(--card-hover);
+}
+
+.layer-toggle__count {
+  color: var(--muted);
+  font-family: var(--font-mono);
+  font-variant-numeric: tabular-nums;
+}
+
+.layer-toggle[data-disabled='true'] {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.layer-sub {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 2px 4px 2px 27px;
+  font-size: var(--fs-min);
+  color: var(--muted);
+}
+
+/* Legend swatches (shared by the card and the compact legend) */
+.swatch {
+  display: inline-block;
+  width: 14px;
+  height: 10px;
+  border-radius: 2px;
+  background: var(--swatch, var(--muted));
+  flex: none;
+}
+
+.swatch--line {
+  height: 3px;
+  border-radius: 2px;
+}
+
+.swatch--dashed {
+  height: 0;
+  background: transparent;
+  border-top: 3px dashed var(--swatch, var(--muted));
+  border-radius: 0;
+}
+
+.swatch--outline {
+  background: transparent;
+  border: 2px solid var(--swatch, var(--muted));
+}
+
+.swatch--outline-dashed {
+  background: transparent;
+  border: 2px dashed var(--swatch, var(--muted));
+}
+
+.swatch--dot {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  justify-self: center;
+}
+
+.swatch--ring {
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  background: transparent;
+  border: 2.5px solid var(--swatch, var(--muted));
+  justify-self: center;
+}
+
+.swatch--donut {
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  background: var(--bg);
+  border: 3px solid var(--swatch, var(--muted));
+  justify-self: center;
+}
+
+.swatch--hex {
+  width: 14px;
+  height: 12px;
+  border-radius: 0;
+  clip-path: polygon(25% 0, 75% 0, 100% 50%, 75% 100%, 25% 100%, 0 50%);
+  opacity: 0.75;
+}
+
+.swatch--block {
+  width: 12px;
+  height: 12px;
+  border-radius: 2px;
+  box-shadow: inset -3px -3px 0 rgba(0, 0, 0, 0.28);
+}
+
+.legend-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 3px 10px;
+  padding: 2px 4px;
+}
+
+.legend-item {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  font-size: var(--fs-min);
+  color: var(--text);
+  white-space: nowrap;
+}
+
+/* Sensor forms: status is shown by form as well as colour */
+.sensor-mark {
+  display: inline-block;
+  border-radius: 50%;
+  flex: none;
+  background: var(--swatch, var(--muted));
+}
+
+.sensor-mark[data-status='normal'] { width: 8px; height: 8px; }
+.sensor-mark[data-status='warning'] { width: 11px; height: 11px; }
+.sensor-mark[data-status='anomaly'] { width: 12px; height: 12px; border: 2px solid #fff; }
+.sensor-mark[data-status='offline'] { width: 9px; height: 9px; background: transparent; border: 2px solid var(--sensor-offline); }
+
+.ring-mark {
+  display: inline-block;
+  border-radius: 50%;
+  border: 2px solid var(--swatch, var(--muted));
+  flex: none;
+}
+
+.ring-mark[data-severity='low'] { width: 9px; height: 9px; }
+.ring-mark[data-severity='medium'] { width: 11px; height: 11px; }
+.ring-mark[data-severity='high'] { width: 13px; height: 13px; }
+.ring-mark[data-severity='critical'] { width: 16px; height: 16px; }
+
+/* ---- Compact legend (bottom left) --------------------------------------------------------------------- */
+.legend {
+  left: 12px;
+  bottom: 38px;
+  width: 232px;
+  max-width: calc(100% - 24px);
+  padding: 8px 10px;
+  background: var(--overlay);
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  backdrop-filter: blur(6px);
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  z-index: 2;
+}
+
+.legend__title {
+  font-size: var(--fs-min);
+  font-weight: 600;
+  line-height: 1.3;
+}
+
+.legend .legend-list {
+  padding: 0;
+  gap: 3px 9px;
+}
+
+/* ---- View buttons (top right) ------------------------------------------------------------------------- */
+.view-buttons {
+  right: 12px;
+  top: 12px;
+  display: flex;
+  gap: 6px;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+  max-width: calc(100% - 180px);
+}
+
+.view-buttons .btn {
+  background: var(--overlay);
+  backdrop-filter: blur(6px);
+}
+
+.view-buttons .btn[aria-pressed='true'] {
+  background: #12384d;
+  border-color: var(--accent-line);
+}
+
+/* ---- Notices (basemap fallback, imagery) -------------------------------------------------------------- */
+.map-notices {
+  position: absolute;
+  z-index: 3;
+  top: 52px;
+  right: 54px;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 6px;
+  max-width: min(360px, calc(100% - 66px));
+  pointer-events: none;
+}
+
+.map-notice {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 6px 8px 6px 10px;
+  background: var(--overlay);
+  border: 1px solid rgba(245, 185, 66, 0.5);
+  border-radius: var(--radius-sm);
+  font-size: var(--fs-min);
+  color: var(--text);
+  pointer-events: auto;
+}
+
+.map-notice .btn {
+  height: 22px;
+  width: 22px;
+}
+
+/* ---- Hover tooltip ------------------------------------------------------------------------------------ */
+.map-tooltip {
+  position: absolute;
+  z-index: 4;
+  left: 0;
+  top: 0;
+  max-width: 300px;
+  padding: 6px 9px;
+  background: rgba(11, 16, 22, 0.96);
+  border: 1px solid var(--line);
+  border-radius: var(--radius-sm);
+  font-size: var(--fs-min);
+  line-height: 1.4;
+  color: var(--text);
+  pointer-events: none;
+  box-shadow: var(--shadow);
+  will-change: transform;
+}
+
+.map-tooltip__title {
+  font-weight: 600;
+}
+
+.map-tooltip__sub {
+  color: var(--muted);
+}
+
+/* ---- Watermark (persistent, cannot be dismissed) ------------------------------------------------------ */
+.map-watermark {
+  position: absolute;
+  z-index: 2;
+  left: 50%;
+  bottom: 7px;
+  transform: translateX(-50%);
+  width: max-content;
+  max-width: calc(100% - 24px);
+  padding: 3px 12px;
+  background: rgba(11, 16, 22, 0.78);
+  border: 1px solid rgba(245, 185, 66, 0.4);
+  border-radius: 99px;
+  font-size: var(--fs-min);
+  line-height: 1.35;
+  font-weight: 600;
+  color: #f7cf7d;
+  text-align: center;
+  pointer-events: none;
+  user-select: none;
+}
+
+/* ---- "How to read this dashboard" card (non-modal) ---------------------------------------------------- */
+.intro-card {
+  position: absolute;
+  z-index: 5;
+  left: 50%;
+  top: 54px;
+  transform: translateX(-50%);
+  width: min(660px, calc(100% - 24px));
+  max-height: calc(100% - 96px);
+  overflow-y: auto;
+  background: var(--overlay);
+  border: 1px solid var(--accent-line);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow);
+  backdrop-filter: blur(8px);
+  padding: 12px 14px 14px;
+}
+
+.intro-card__head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  margin-bottom: 8px;
+}
+
+.intro-card__title {
+  font-size: var(--fs-title);
+}
+
+.intro-list {
+  display: grid;
+  grid-template-columns: max-content minmax(0, 1fr);
+  gap: 7px 12px;
+  font-size: var(--fs-min);
+  line-height: 1.45;
+}
+
+.intro-list dt {
+  font-weight: 700;
+  letter-spacing: 0.05em;
+  color: var(--accent);
+  white-space: nowrap;
+}
+
+.intro-list dd {
+  color: var(--text);
+}
+
+.intro-card__foot {
+  margin-top: 10px;
+  padding-top: 8px;
+  border-top: 1px solid var(--line);
+  font-size: var(--fs-min);
+  color: var(--muted);
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+}
+
+/* ---- MapLibre overrides ------------------------------------------------------------------------------- */
+.maplibregl-map {
+  font: inherit;
+  font-size: var(--fs-min);
+}
+
+.maplibregl-canvas:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: -2px;
+}
+
+.maplibregl-ctrl-attrib,
+.maplibregl-ctrl-attrib.maplibregl-compact {
+  background-color: rgba(11, 16, 22, 0.86);
+  color: #b4c1d1;
+  font-size: var(--fs-min);
+  line-height: 1.45;
+}
+
+.maplibregl-ctrl-attrib a {
+  color: #b4c1d1;
+  text-decoration: underline;
+  text-decoration-color: rgba(180, 193, 209, 0.5);
+}
+
+.maplibregl-ctrl-attrib.maplibregl-compact {
+  min-height: 24px;
+  border: 1px solid var(--line);
+  border-radius: 12px;
+}
+
+.maplibregl-ctrl-attrib-button,
+.maplibregl-ctrl-attrib.maplibregl-compact-show .maplibregl-ctrl-attrib-button {
+  background-color: rgba(230, 237, 245, 0.8);
+  border-radius: 12px;
+}
+
+.maplibregl-ctrl-group {
+  background: var(--overlay);
+  border: 1px solid var(--line);
+  box-shadow: none !important;
+}
+
+.maplibregl-ctrl-group button {
+  width: 30px;
+  height: 30px;
+}
+
+.maplibregl-ctrl-group button + button {
+  border-top: 1px solid var(--line);
+}
+
+.maplibregl-ctrl-group button:not(:disabled):hover {
+  background-color: var(--card-hover);
+}
+
+.maplibregl-ctrl-group .maplibregl-ctrl-icon {
+  filter: invert(0.92) hue-rotate(180deg);
+}
+
+.maplibregl-ctrl-scale {
+  background: rgba(11, 16, 22, 0.6);
+  border-color: var(--muted);
+  color: var(--muted);
+  font-size: var(--fs-min);
+}
+
+.maplibregl-ctrl-top-right {
+  top: 44px;
+}
+
+/* The bottom row belongs to the watermark; credits and scale sit above it, clear of the legend. */
+.maplibregl-ctrl-bottom-right {
+  bottom: 30px;
+  max-width: calc(100% - 262px);
+}
+
+/* With the layers card open the credits stay clear of it. */
+.map-zone:has(.layers-card[data-open='true']) .maplibregl-ctrl-bottom-right {
+  max-width: calc(100% - 322px);
+}
+
+.maplibregl-ctrl-bottom-right .maplibregl-ctrl {
+  margin: 0 12px 6px 0;
+}
+
+.maplibregl-cooperative-gesture-screen {
+  font-size: var(--fs-body);
+}
+
+/* ---- Narrow maps -------------------------------------------------------------------------------------- */
+@media (max-width: 899px) {
+  .legend {
+    display: none;
+  }
+
+  .map-watermark {
+    border-radius: var(--radius-sm);
+  }
+
+  .maplibregl-ctrl-bottom-right {
+    bottom: 48px;
+    max-width: calc(100% - 12px);
+  }
+
+  .view-buttons {
+    max-width: calc(100% - 176px);
+  }
+
+  .map-notices {
+    top: 88px;
+  }
+}
+
+@media (max-width: 479px) {
+  /* Icon-only view buttons (each keeps its accessible name). */
+  .view-buttons .btn {
+    width: 32px;
+    padding: 0;
+  }
+
+  .view-buttons .btn__label {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+    clip-path: inset(50%);
+    white-space: nowrap;
+  }
+}

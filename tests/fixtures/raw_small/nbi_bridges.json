@@ -1,0 +1,183 @@
+{
+ "fields": [
+  {
+   "name": "STRUCTURE_NUMBER_008"
+  }
+ ],
+ "features": [
+  {
+   "attributes": {
+    "STRUCTURE_NUMBER_008": "000000000000011",
+    "FACILITY_CARRIED_007": "2nd. AVENUE",
+    "FEATURES_DESC_006A": "TEST RIVER",
+    "LOCATION_009": "0.5 MI S OF MAIN ST",
+    "OWNER_022": "01",
+    "YEAR_BUILT_027": 1935,
+    "YEAR_RECONSTRUCTED_106": 2001,
+    "ADT_029": 10500,
+    "YEAR_ADT_030": 2022,
+    "STRUCTURE_LEN_MT_049": 131.1,
+    "DATE_OF_INSPECT_090": "223",
+    "DECK_COND_058": "6",
+    "SUPERSTRUCTURE_COND_059": "6",
+    "SUBSTRUCTURE_COND_060": "5",
+    "CULVERT_COND_062": "N",
+    "BRIDGE_CONDITION": "F",
+    "LOWEST_RATING": 5,
+    "LAT_016": "37452376",
+    "LONG_017": "100005418",
+    "STATUS": "undocumented",
+    "DATE": "undocumented"
+   },
+   "geometry": {
+    "x": -100.01505,
+    "y": 37.7566
+   }
+  },
+  {
+   "attributes": {
+    "STRUCTURE_NUMBER_008": "000000000000022",
+    "FACILITY_CARRIED_007": "US-99 HWY",
+    "FEATURES_DESC_006A": "TEST RIVER",
+    "LOCATION_009": null,
+    "OWNER_022": "01",
+    "YEAR_BUILT_027": 1960,
+    "YEAR_RECONSTRUCTED_106": 0,
+    "ADT_029": null,
+    "YEAR_ADT_030": null,
+    "STRUCTURE_LEN_MT_049": null,
+    "DATE_OF_INSPECT_090": null,
+    "DECK_COND_058": "N",
+    "SUPERSTRUCTURE_COND_059": "N",
+    "SUBSTRUCTURE_COND_060": "N",
+    "CULVERT_COND_062": "N",
+    "BRIDGE_CONDITION": "G",
+    "LOWEST_RATING": 7,
+    "LAT_016": "37480000",
+    "LONG_017": "100030000",
+    "STATUS": "undocumented",
+    "DATE": "undocumented"
+   },
+   "geometry": {
+    "x": -100.0149,
+    "y": 37.7565
+   }
+  },
+  {
+   "attributes": {
+    "STRUCTURE_NUMBER_008": "000000000000033",
+    "FACILITY_CARRIED_007": "WEST TEST ST.",
+    "FEATURES_DESC_006A": "DRAINAGE DITCH",
+    "LOCATION_009": null,
+    "OWNER_022": "04",
+    "YEAR_BUILT_027": 1978,
+    "YEAR_RECONSTRUCTED_106": 0,
+    "ADT_029": 1200,
+    "YEAR_ADT_030": 2020,
+    "STRUCTURE_LEN_MT_049": 7.3,
+    "DATE_OF_INSPECT_090": "1122",
+    "DECK_COND_058": "N",
+    "SUPERSTRUCTURE_COND_059": "N",
+    "SUBSTRUCTURE_COND_060": "N",
+    "CULVERT_COND_062": "6",
+    "BRIDGE_CONDITION": "G",
+    "LOWEST_RATING": 6,
+    "LAT_016": "37451800",
+    "LONG_017": "100010660",
+    "STATUS": "undocumented",
+    "DATE": "undocumented"
+   },
+   "geometry": {
+    "x": -100.0185,
+    "y": 37.755
+   }
+  },
+  {
+   "attributes": {
+    "STRUCTURE_NUMBER_008": "000000000000044",
+    "FACILITY_CARRIED_007": "SIDE ROAD",
+    "FEATURES_DESC_006A": null,
+    "LOCATION_009": null,
+    "OWNER_022": "02",
+    "YEAR_BUILT_027": 1988,
+    "YEAR_RECONSTRUCTED_106": null,
+    "ADT_029": 300,
+    "YEAR_ADT_030": 2019,
+    "STRUCTURE_LEN_MT_049": 12.0,
+    "DATE_OF_INSPECT_090": "998",
+    "DECK_COND_058": "4",
+    "SUPERSTRUCTURE_COND_059": "5",
+    "SUBSTRUCTURE_COND_060": "4",
+    "CULVERT_COND_062": "N",
+    "BRIDGE_CONDITION": "P",
+    "LOWEST_RATING": 4,
+    "LAT_016": "37450540",
+    "LONG_017": "100004680",
+    "STATUS": "undocumented",
+    "DATE": "undocumented"
+   },
+   "geometry": {
+    "x": -100.013,
+    "y": 37.7515
+   }
+  },
+  {
+   "attributes": {
+    "STRUCTURE_NUMBER_008": "000000000000055",
+    "FACILITY_CARRIED_007": "OUTSIDE ROAD",
+    "FEATURES_DESC_006A": "CREEK",
+    "LOCATION_009": null,
+    "OWNER_022": "01",
+    "YEAR_BUILT_027": 1999,
+    "YEAR_RECONSTRUCTED_106": 0,
+    "ADT_029": null,
+    "YEAR_ADT_030": null,
+    "STRUCTURE_LEN_MT_049": null,
+    "DATE_OF_INSPECT_090": null,
+    "DECK_COND_058": "N",
+    "SUPERSTRUCTURE_COND_059": "N",
+    "SUBSTRUCTURE_COND_060": "N",
+    "CULVERT_COND_062": "N",
+    "BRIDGE_CONDITION": "G",
+    "LOWEST_RATING": null,
+    "LAT_016": "37451800",
+    "LONG_017": "100001800",
+    "STATUS": "undocumented",
+    "DATE": "undocumented"
+   },
+   "geometry": {
+    "x": -100.005,
+    "y": 37.755
+   }
+  },
+  {
+   "attributes": {
+    "STRUCTURE_NUMBER_008": "000000000000066",
+    "FACILITY_CARRIED_007": "UNCHECKED ROAD",
+    "FEATURES_DESC_006A": null,
+    "LOCATION_009": null,
+    "OWNER_022": "01",
+    "YEAR_BUILT_027": 2005,
+    "YEAR_RECONSTRUCTED_106": 0,
+    "ADT_029": null,
+    "YEAR_ADT_030": null,
+    "STRUCTURE_LEN_MT_049": null,
+    "DATE_OF_INSPECT_090": null,
+    "DECK_COND_058": "N",
+    "SUPERSTRUCTURE_COND_059": "N",
+    "SUBSTRUCTURE_COND_060": "N",
+    "CULVERT_COND_062": "N",
+    "BRIDGE_CONDITION": null,
+    "LOWEST_RATING": null,
+    "LAT_016": "0",
+    "LONG_017": "0",
+    "STATUS": "undocumented",
+    "DATE": "undocumented"
+   },
+   "geometry": {
+    "x": -100.014,
+    "y": 37.7525
+   }
+  }
+ ]
+}

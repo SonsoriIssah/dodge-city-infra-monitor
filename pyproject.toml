@@ -1,0 +1,78 @@
+[build-system]
+requires = ["setuptools>=68"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "dodge-city-infra-monitor"
+version = "1.0.0"
+description = "3D urban infrastructure monitoring and GeoAI dashboard prototype for Dodge City, Kansas (PostGIS, simulated sensors, prototype anomaly detection)."
+readme = "README.md"
+requires-python = ">=3.11"
+# Runtime dependencies are installed from requirements.txt
+# (setup: pip install -r requirements.txt && pip install -e . --no-deps); this list mirrors that file.
+dependencies = [
+    "fastapi>=0.115,<1.0",
+    "uvicorn[standard]>=0.30,<1.0",
+    "psycopg[binary,pool]>=3.2,<4.0",
+    "pydantic>=2.7,<3.0",
+    "pydantic-settings>=2.3,<3.0",
+    "numpy>=1.26,<3.0",
+    "scikit-learn>=1.4,<2.0",
+    "httpx>=0.27,<1.0",
+    "tzdata>=2024.1",
+]
+
+[project.optional-dependencies]
+dev = ["pytest>=8.0", "pytest-cov>=5.0", "ruff>=0.6"]
+
+# Flat layout with the two application packages at the repository root. The explicit package-dir makes the
+# editable install a plain path entry for the repo root, so `backend` is importable as soon as it exists.
+[tool.setuptools]
+package-dir = { "" = "." }
+
+[tool.setuptools.packages.find]
+where = ["."]
+include = ["pipeline", "pipeline.*", "backend", "backend.*"]
+
+[tool.pytest.ini_options]
+pythonpath = ["."]
+testpaths = ["tests"]
+addopts = "-ra --strict-markers"
+markers = [
+    "db: integration test on the infra_test database; skipped when PostGIS is unreachable unless REQUIRE_DB=1 (then it is an error)",
+    "slow: long-running check (detection targets on further seeds); deselected unless selected with -m slow",
+]
+# Warnings are never turned into errors. The test client of Starlette announces its move to httpx2 on import;
+# that notice is not about this project.
+filterwarnings = [
+    "ignore:Using .httpx. with .starlette.testclient. is deprecated",
+]
+
+[tool.coverage.run]
+source = ["pipeline", "backend"]
+
+[tool.coverage.report]
+skip_empty = true
+exclude_also = [
+    "if __name__ == .__main__.:",
+    "raise NotImplementedError",
+]
+
+[tool.ruff]
+line-length = 120
+target-version = "py311"
+extend-exclude = [".venv", ".venv-tools", "data", "dashboard"]
+
+[tool.ruff.lint]
+select = ["E", "F", "W", "I", "UP", "B", "C4", "SIM"]
+ignore = [
+    "B905",    # pairwise zip(coords, coords[1:]) is intentionally uneven
+    "SIM108",  # ternaries are not always clearer
+]
+
+[tool.ruff.lint.per-file-ignores]
+# Assertions and parametrised cases of the test suite are kept on one line each.
+"tests/**" = ["E501"]
+
+[tool.ruff.lint.isort]
+known-first-party = ["pipeline", "backend"]

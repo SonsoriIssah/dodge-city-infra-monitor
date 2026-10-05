@@ -3,97 +3,121 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>Dodge City Infrastructure Monitor</title>
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
-  <link href="https://unpkg.com/maplibre-gl@4.7.1/dist/maplibre-gl.css" rel="stylesheet">
-  <link href="css/style.css" rel="stylesheet">
+  <meta name="color-scheme" content="dark">
+  <meta name="description" content="3D Urban Infrastructure Monitoring prototype for Dodge City, Kansas: real GIS data in PostGIS, simulated sensor data, prototype anomaly detection and a derived asset health score. Not a record of real infrastructure condition.">
+  <title>3D Urban Infrastructure Monitoring — Dodge City, Kansas</title>
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Crect width='24' height='24' rx='5' fill='%23123046'/%3E%3Cpath d='M4 20V10l4-2.4V20M8 20V5l6 2.5V20M14 20v-7.5l5-1.7V20M3 20h18' fill='none' stroke='%2338bdf8' stroke-width='1.6' stroke-linejoin='round'/%3E%3C/svg%3E">
+  <link rel="stylesheet" href="./vendor/maplibre-gl/maplibre-gl.css">
+  <link rel="stylesheet" href="./css/tokens.css">
+  <link rel="stylesheet" href="./css/base.css">
+  <link rel="stylesheet" href="./css/layout.css">
+  <link rel="stylesheet" href="./css/components.css">
+  <link rel="stylesheet" href="./css/panels.css">
+  <link rel="stylesheet" href="./css/map.css">
 </head>
-<body>
-  <header class="topbar">
+<body class="is-loading">
+  <a class="skip-link" href="#panel">Skip to the assets, anomalies and sensors panel</a>
+
+  <header class="app-header">
     <div class="brand">
-      <div class="logo" aria-hidden="true">
-        <svg viewBox="0 0 24 24" width="22" height="22"><path d="M3 21V9l5-3v15M8 21V4l7 3v14M15 21v-9l6-2v11M2 21h20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"/></svg>
+      <div class="brand__logo" aria-hidden="true">
+        <svg viewBox="0 0 24 24" width="20" height="20"><path d="M3 21V9l5-3v15M8 21V4l7 3v14M15 21v-9l6-2v11M2 21h20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"/></svg>
       </div>
-      <div>
-        <h1>Dodge City Infrastructure Monitor</h1>
-        <p class="sub">3D asset monitoring · IoT telemetry · GeoAI anomaly detection — Dodge City, Kansas</p>
+      <div class="brand__text">
+        <h1 class="brand__title">3D Urban Infrastructure Monitoring</h1>
+        <p class="brand__sub" id="study-area-name">Dodge City, Kansas · research prototype</p>
       </div>
     </div>
-    <div class="clock">
-      <button id="btn-play" class="icon-btn" title="Play / pause (space)" aria-label="Play">
-        <svg viewBox="0 0 24 24" width="16" height="16"><path id="play-icon" d="M7 4l13 8-13 8z" fill="currentColor"/></svg>
-      </button>
-      <select id="speed" title="Playback speed" aria-label="Playback speed">
-        <option value="400">1×</option><option value="150" selected>3×</option><option value="50">8×</option>
-      </select>
-      <div class="time-readout"><span id="t-date">—</span><span id="t-hour">—</span></div>
-      <span class="badge" id="src-badge">OSM</span>
+    <ul class="badges" aria-label="Data notices">
+      <li class="badge badge--notice" title="Every sensor, reading and sensor status is produced by a simulator.">Simulated Sensor Data</li>
+      <li class="badge badge--notice" title="A retrospective batch analysis scored against simulated events; not a certified safety system.">Prototype Anomaly Detection</li>
+      <li class="badge badge--notice" title="Computed from the simulated sensors; not an assessment of the real condition of any structure.">Derived Asset Health Score</li>
+      <li class="badge badge--source" id="source-badge">Source: loading</li>
+    </ul>
+    <div class="header-actions">
+      <button class="btn" type="button" id="btn-about" aria-haspopup="dialog">About the data</button>
+      <button class="btn btn--icon" type="button" id="btn-intro" aria-label="How to read this dashboard" aria-controls="intro-card" aria-expanded="false" title="How to read this dashboard">?</button>
     </div>
   </header>
 
-  <main class="layout">
-    <!-- LEFT: KPIs + layers -->
-    <aside class="panel left" aria-label="Overview and layers">
-      <section class="kpis" id="kpis"></section>
+  <section class="kpi-zone" aria-label="Key figures at the selected simulated time">
+    <div class="kpi-strip" id="kpi-strip" aria-busy="true">
+      <span class="skeleton skeleton--kpi"></span>
+      <span class="skeleton skeleton--kpi"></span>
+      <span class="skeleton skeleton--kpi"></span>
+      <span class="skeleton skeleton--kpi"></span>
+      <span class="skeleton skeleton--kpi"></span>
+    </div>
+    <p class="status-sentence" id="status-sentence" aria-live="polite">Loading the monitoring data</p>
+  </section>
 
-      <section class="card">
-        <h2>Layers</h2>
-        <div class="layer-list" id="layer-list"></div>
-      </section>
-
-      <section class="card">
-        <h2>Buildings coloured by</h2>
-        <div class="seg" id="bldg-mode" role="tablist">
-          <button data-mode="risk" class="on">Risk</button>
-          <button data-mode="condition">Condition</button>
-          <button data-mode="age">Age</button>
-        </div>
-        <label class="row-toggle"><input type="checkbox" id="basemap-sat"> Satellite basemap</label>
-      </section>
-
-      <section class="card">
-        <h2>GeoAI model performance <span class="hint" title="Scored against the faults injected by the IoT simulator">ⓘ</span></h2>
-        <div class="metrics" id="metrics"></div>
-      </section>
-    </aside>
-
-    <!-- MAP -->
-    <section class="map-wrap">
-      <div id="map" aria-label="3D map of Dodge City infrastructure"></div>
-      <div class="legend" id="legend"></div>
-      <div class="view-btns">
-        <button class="icon-btn" id="btn-3d" title="Toggle 2D / 3D">3D</button>
-        <button class="icon-btn" id="btn-home" title="Reset view">
-          <svg viewBox="0 0 24 24" width="16" height="16"><path d="M3 11l9-7 9 7v9h-6v-6H9v6H3z" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/></svg>
-        </button>
-      </div>
-    </section>
-
-    <!-- RIGHT: incidents + detail -->
-    <aside class="panel right" aria-label="Incidents and details">
-      <section class="card detail hidden" id="detail"></section>
-      <section class="card grow">
-        <div class="feed-head">
-          <h2>Incidents <span class="count" id="inc-count"></span></h2>
-          <label class="row-toggle small"><input type="checkbox" id="active-only" checked> Active now</label>
-        </div>
-        <div class="chips" id="type-filter"></div>
-        <ol class="feed" id="feed"></ol>
-      </section>
-    </aside>
+  <main class="map-zone" aria-label="3D map of the study area">
+    <div class="map" id="map"></div>
+    <div class="map-skeleton" id="map-skeleton"><div class="map-skeleton__box" role="status">Loading the map</div></div>
+    <div class="map-overlay" id="layers-card"></div>
+    <div class="map-overlay view-buttons" id="view-buttons" role="group" aria-label="Map view"></div>
+    <div class="map-overlay" id="legend" aria-label="Map legend"></div>
+    <div class="map-notices" id="map-notices" role="status"></div>
+    <div class="intro-card" id="intro-card" hidden></div>
+    <div class="map-tooltip" id="map-tooltip" role="tooltip" hidden></div>
+    <p class="map-watermark">Simulated sensor data · prototype — not a record of real infrastructure condition</p>
   </main>
 
-  <footer class="timeline">
-    <canvas id="histogram" height="46"></canvas>
-    <input type="range" id="slider" min="0" max="0" value="0" aria-label="Time">
-    <div class="tl-labels" id="tl-labels"></div>
-  </footer>
+  <section class="timeline" id="timeline" aria-label="Time playback" aria-busy="true">
+    <span class="skeleton skeleton--row" style="flex: 0 0 420px"></span>
+    <span class="skeleton skeleton--row" style="flex: 1 1 auto"></span>
+  </section>
 
-  <div class="loading" id="loading">Loading data…</div>
+  <aside class="side-panel" id="panel" aria-label="Assets, anomalies and sensors" aria-busy="true" tabindex="-1">
+    <div class="tabpanel">
+      <div class="skeleton-stack" role="status" aria-label="Loading">
+        <span class="skeleton skeleton--row"></span>
+        <span class="skeleton skeleton--row"></span>
+        <span class="skeleton skeleton--row"></span>
+        <span class="skeleton skeleton--row"></span>
+        <span class="skeleton skeleton--block"></span>
+      </div>
+    </div>
+  </aside>
 
-  <script src="data/data.js"></script>
-  <script src="https://unpkg.com/maplibre-gl@4.7.1/dist/maplibre-gl.js"></script>
-  <script src="js/app.js"></script>
+  <dialog class="dialog" id="about-dialog" aria-labelledby="about-title"></dialog>
+
+  <div class="app-overlay" id="app-overlay" role="alert" hidden></div>
+
+  <noscript>
+    <div class="app-overlay">
+      <div class="app-overlay__box">
+        <h2>JavaScript is required</h2>
+        <p>This dashboard draws its map and charts in the browser. Enable JavaScript and reload the page.</p>
+      </div>
+    </div>
+  </noscript>
+
+  <!-- ES modules and fetch do not work from the file: protocol; say so instead of showing an empty page. -->
+  <script>
+    (function () {
+      if (window.location.protocol !== 'file:') return;
+      window.DCIM_FILE_PROTOCOL = true;
+      var overlay = document.getElementById('app-overlay');
+      var box = document.createElement('div');
+      box.className = 'app-overlay__box';
+      var title = document.createElement('h2');
+      title.textContent = 'This page needs a web server';
+      var text = document.createElement('p');
+      text.appendChild(document.createTextNode('Open this dashboard over http — run '));
+      var command = document.createElement('code');
+      command.textContent = 'python -m http.server -d dashboard 8080';
+      text.appendChild(command);
+      text.appendChild(document.createTextNode(' or start the API'));
+      box.appendChild(title);
+      box.appendChild(text);
+      overlay.appendChild(box);
+      overlay.hidden = false;
+      document.body.classList.remove('is-loading');
+    })();
+  </script>
+  <script src="./config.js"></script>
+  <script src="./vendor/maplibre-gl/maplibre-gl.js" defer></script>
+  <script type="module" src="./js/main.js"></script>
 </body>
 </html>

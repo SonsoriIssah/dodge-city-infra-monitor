@@ -1,0 +1,346 @@
+/*
+ * Page grid (build contract 12.2).
+ *   rows:    header 44 px | KPI strip 52 px + one-line status sentence | body 1fr | timeline 64 px
+ *   columns: map 1fr | right panel 340 px (380 px at >= 1600 px, 300 px at 900-1279 px)
+ *   < 900 px: one scrolling column - header, KPI strip (horizontal scroll), map 56 vh, timeline, panel.
+ * Acceptance: at 1366x768 the map takes at least half of the viewport and the first screen does not scroll.
+ */
+body {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) var(--panel-w);
+  grid-template-rows: minmax(var(--header-h), auto) auto minmax(0, 1fr) minmax(var(--timeline-h), auto);
+  grid-template-areas:
+    'header header'
+    'kpi kpi'
+    'map panel'
+    'timeline timeline';
+  height: 100vh;
+  height: 100dvh;
+  overflow: hidden;
+}
+
+/* Source order is header, KPI strip, map, timeline, panel (the order of the single-column layout). */
+.app-header {
+  grid-area: header;
+}
+
+.kpi-zone {
+  grid-area: kpi;
+}
+
+.map-zone {
+  grid-area: map;
+}
+
+.side-panel {
+  grid-area: panel;
+}
+
+.timeline {
+  grid-area: timeline;
+}
+
+/* ---- Header ------------------------------------------------------------------------------------------- */
+.app-header {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  min-width: 0;
+  padding: 0 var(--pad);
+  background: var(--panel);
+  border-bottom: 1px solid var(--line);
+}
+
+.brand {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  min-width: 0;
+  flex: 0 1 auto;
+}
+
+.brand__logo {
+  display: grid;
+  place-items: center;
+  width: 30px;
+  height: 30px;
+  flex: none;
+  border-radius: 8px;
+  background: linear-gradient(135deg, #0e3a52, #123046);
+  color: var(--accent);
+}
+
+.brand__text {
+  min-width: 0;
+  line-height: 1.2;
+}
+
+.brand__title {
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.brand__sub {
+  font-size: var(--fs-min);
+  color: var(--muted);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.badges {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  min-width: 0;
+  margin-left: auto;
+}
+
+.badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  height: 24px;
+  padding: 0 9px;
+  border: 1px solid var(--line);
+  border-radius: 99px;
+  font-size: var(--fs-min);
+  color: var(--muted);
+  white-space: nowrap;
+}
+
+.badge--notice {
+  border-color: rgba(245, 185, 66, 0.45);
+  background: rgba(245, 185, 66, 0.08);
+  color: #f7cf7d;
+  font-weight: 600;
+}
+
+.badge--source {
+  font-family: var(--font-mono);
+}
+
+.header-actions {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  flex: none;
+}
+
+/* ---- KPI strip + status sentence ---------------------------------------------------------------------- */
+.kpi-zone {
+  display: grid;
+  grid-template-rows: var(--kpi-h) auto;
+  gap: 4px;
+  padding: 6px var(--pad) 5px;
+  background: var(--bg);
+  border-bottom: 1px solid var(--line);
+  min-width: 0;
+}
+
+.kpi-strip {
+  display: grid;
+  grid-template-columns: repeat(5, minmax(0, 1fr));
+  gap: var(--gap);
+  min-width: 0;
+}
+
+.status-sentence {
+  min-height: 18px;
+  font-size: var(--fs-min);
+  line-height: 18px;
+  color: var(--muted);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.status-sentence strong {
+  color: var(--text);
+  font-weight: 600;
+}
+
+/* ---- Body --------------------------------------------------------------------------------------------- */
+.map-zone {
+  position: relative;
+  min-width: 0;
+  min-height: 0;
+  overflow: hidden;
+  background: var(--bg);
+}
+
+.side-panel {
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+  min-width: 0;
+  background: var(--panel);
+  border-left: 1px solid var(--line);
+}
+
+/* ---- Timeline ----------------------------------------------------------------------------------------- */
+.timeline {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  min-width: 0;
+  padding: 6px var(--pad);
+  background: var(--panel);
+  border-top: 1px solid var(--line);
+}
+
+/* ---- Full-page states --------------------------------------------------------------------------------- */
+/* Covers everything below the header (a grid item laid over the KPI, map/panel and timeline rows). */
+.app-overlay {
+  grid-area: 2 / 1 / -1 / -1;
+  position: relative;
+  z-index: 50;
+  display: grid;
+  place-items: center;
+  padding: 24px;
+  background: var(--bg);
+  overflow: auto;
+}
+
+.app-overlay__box {
+  width: min(560px, 100%);
+  background: var(--card);
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  padding: 20px 22px;
+  box-shadow: var(--shadow);
+}
+
+.app-overlay__box h2 {
+  font-size: var(--fs-title);
+  margin-bottom: 8px;
+}
+
+.app-overlay__box p {
+  color: var(--muted);
+  margin-bottom: 10px;
+}
+
+.app-overlay__detail {
+  font-family: var(--font-mono);
+  font-size: var(--fs-min);
+  color: var(--muted);
+  background: var(--inset);
+  border: 1px solid var(--line);
+  border-radius: var(--radius-sm);
+  padding: 8px 10px;
+  margin-bottom: 14px;
+  overflow-wrap: anywhere;
+}
+
+.app-overlay__actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+/* ---- 900-1279 px: narrower panel; the header takes two rows (title and actions, then the notices) ------ */
+@media (max-width: 1279px) {
+  .app-header {
+    flex-wrap: wrap;
+    row-gap: 5px;
+    padding: 6px var(--pad);
+  }
+
+  .brand {
+    flex: 1 1 0;
+  }
+
+  .header-actions {
+    margin-left: auto;
+  }
+
+  .badges {
+    order: 3;
+    flex: 1 1 100%;
+    flex-wrap: wrap;
+    margin-left: 0;
+  }
+
+  .timeline {
+    gap: 8px;
+  }
+}
+
+/* ---- < 900 px: single scrolling column ---------------------------------------------------------------- */
+@media (max-width: 899px) {
+  body {
+    display: block;
+    height: auto;
+    min-height: 100vh;
+    min-height: 100dvh;
+    overflow: auto;
+  }
+
+  .app-header {
+    row-gap: 6px;
+    padding: 8px var(--pad);
+    min-height: var(--header-h);
+  }
+
+  .brand__title,
+  .brand__sub {
+    white-space: normal;
+  }
+
+  .kpi-zone {
+    grid-template-rows: auto auto;
+    padding-right: 0;
+  }
+
+  .kpi-strip {
+    display: flex;
+    overflow-x: auto;
+    padding-right: var(--pad);
+    padding-bottom: 4px;
+    scroll-snap-type: x proximity;
+  }
+
+  .kpi-strip > * {
+    flex: 0 0 236px;
+    scroll-snap-align: start;
+  }
+
+  .status-sentence {
+    white-space: normal;
+    padding-right: var(--pad);
+  }
+
+  .map-zone {
+    height: 56vh;
+    min-height: 320px;
+  }
+
+  .timeline {
+    flex-wrap: wrap;
+    row-gap: 8px;
+    padding: 8px var(--pad);
+    border-bottom: 1px solid var(--line);
+  }
+
+  .side-panel {
+    border-left: 0;
+    min-height: 60vh;
+  }
+
+  .app-overlay {
+    position: fixed;
+    inset: 0;
+  }
+}
+
+@media (max-width: 479px) {
+  .badge {
+    white-space: normal;
+    height: auto;
+    min-height: 24px;
+    padding: 3px 9px;
+    border-radius: 12px;
+  }
+}

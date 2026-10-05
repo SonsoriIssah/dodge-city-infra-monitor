@@ -1,0 +1,11 @@
+# Environment for tools/derive_building_heights.py ONLY (see tools/README.md).
+# Do NOT install these into the application environment (.venv): rasterio bundles
+# GDAL/PROJ, which the app deliberately does not depend on.
+#
+#   uv venv --python 3.12 .venv-tools
+#   uv pip install --python .venv-tools/Scripts/python.exe -r tools/requirements-heights.txt
+#
+# Verified with rasterio 1.5.2 (bundled GDAL 3.12.2, LERC + ZSTD) and numpy 2.5.3
+# on Python 3.12 / Windows 11.
+rasterio>=1.4,<2
+numpy>=2,<3

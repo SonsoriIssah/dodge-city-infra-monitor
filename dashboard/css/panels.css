@@ -1,0 +1,537 @@
+/*
+ * Right-panel tabs (Assets, Anomalies, Sensors) and the time-series chart (js/ui/chart.js).
+ * Builds on css/components.css (.block, .kv, .list, .row, .pill, .tag, .filters, .data-table).
+ * Chart colours: one accent-coloured series, the expected value and its band in the muted colour, status
+ * colours only for status (threshold lines, anomaly windows) and always next to a text label.
+ */
+
+/* ---- stacked list rows: headline + detail lines ------------------------------------------------------------- */
+.row--stacked {
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  gap: 3px;
+}
+
+.row__top {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  min-width: 0;
+}
+
+.row__top .row__title {
+  flex: 1 1 auto;
+  min-width: 0;
+}
+
+.row__top .pill {
+  flex: none;
+}
+
+.row__top-trail {
+  display: flex;
+  align-items: baseline;
+  gap: 4px;
+  flex: none;
+  font-variant-numeric: tabular-nums;
+}
+
+.row__unit {
+  font-size: var(--fs-min);
+  color: var(--muted);
+}
+
+.row__line {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  min-width: 0;
+  font-size: var(--fs-min);
+  color: var(--muted);
+}
+
+.row__line > span:first-child {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.row__line > :not(:first-child) {
+  flex: none;
+}
+
+.row__trail .pill {
+  justify-content: flex-end;
+}
+
+/* ---- blocks ---------------------------------------------------------------------------------------------- */
+.block__subtitle {
+  margin-top: 4px;
+  padding-top: 8px;
+  border-top: 1px solid var(--line);
+  font-size: var(--fs-min);
+  font-weight: 600;
+  color: var(--text);
+}
+
+.source-list,
+.tag-list,
+.link-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  font-size: var(--fs-min);
+}
+
+.source-list {
+  color: var(--muted);
+}
+
+.link-list {
+  flex-direction: row;
+  flex-wrap: wrap;
+  gap: 4px 10px;
+}
+
+.tag-list code,
+.kv__note {
+  font-family: var(--font-mono);
+  font-size: var(--fs-min);
+  color: var(--muted);
+}
+
+.kv__stack {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 2px;
+}
+
+span.kv__note {
+  font-family: var(--font-sans);
+}
+
+.kv--penalties {
+  grid-template-columns: minmax(0, 1fr) max-content;
+}
+
+.kv dd.num {
+  text-align: right;
+}
+
+.explanation {
+  font-size: var(--fs-body);
+  line-height: 1.5;
+}
+
+.score-table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.score-table th[scope='row'] {
+  color: var(--text);
+  font-weight: 400;
+}
+
+.score-table .is-total th,
+.score-table .is-total td {
+  font-weight: 700;
+  border-bottom: 0;
+}
+
+/* ---- health score and latest reading ---------------------------------------------------------------------- */
+.health,
+.reading {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+.health__score {
+  display: flex;
+  align-items: baseline;
+  gap: 4px;
+  font-variant-numeric: tabular-nums;
+}
+
+.health__value,
+.reading__value {
+  font-size: 28px;
+  font-weight: 700;
+  line-height: 1;
+  font-variant-numeric: tabular-nums;
+  min-width: 2ch;
+}
+
+.health__of {
+  font-size: var(--fs-min);
+  color: var(--muted);
+}
+
+.health__meta {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 2px;
+  min-width: 0;
+}
+
+.health__asof {
+  font-size: var(--fs-min);
+  color: var(--muted);
+}
+
+.health__equation {
+  margin-top: 6px;
+  font-size: var(--fs-min);
+  color: var(--muted);
+  font-variant-numeric: tabular-nums;
+}
+
+.health__penalties {
+  min-height: 96px;
+}
+
+.trend {
+  font-size: var(--fs-body);
+  font-variant-numeric: tabular-nums;
+}
+
+.trend__arrow {
+  display: inline-block;
+  width: 1.2em;
+  color: var(--muted);
+}
+
+.trend__detail {
+  color: var(--muted);
+}
+
+/* ---- filters ---------------------------------------------------------------------------------------------- */
+.filters .select {
+  width: 100%;
+}
+
+.filters__foot {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+}
+
+.filters__count {
+  font-size: var(--fs-min);
+  color: var(--muted);
+  min-width: 0;
+}
+
+/* ---- chart -------------------------------------------------------------------------------------------------- */
+.chart {
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  min-width: 0;
+}
+
+.small-multiple + .small-multiple {
+  padding-top: 8px;
+  border-top: 1px solid var(--line);
+}
+
+.small-multiple .skeleton--block,
+.chart--compact + .skeleton--block {
+  height: 112px;
+}
+
+.chart__head {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 8px;
+}
+
+.chart__title {
+  font-size: var(--fs-min);
+  font-weight: 600;
+  color: var(--text);
+  min-width: 0;
+}
+
+.chart__toggle {
+  flex: none;
+  font-size: var(--fs-min);
+}
+
+.chart-legend {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 2px 12px;
+  font-size: var(--fs-min);
+  color: var(--muted);
+}
+
+.chart-legend__item {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+}
+
+.chart-legend__key {
+  display: inline-block;
+  width: 14px;
+  height: 0;
+  border-top: 2px solid var(--accent);
+  flex: none;
+}
+
+.chart-legend__key[data-swatch='expected'] {
+  border-top: 1.5px solid var(--muted);
+}
+
+.chart-legend__key[data-swatch='band'],
+.chart-legend__key[data-swatch='anomaly'],
+.chart-legend__key[data-swatch='event'] {
+  height: 10px;
+  border-top: 0;
+  border-radius: 2px;
+}
+
+.chart-legend__key[data-swatch='band'] {
+  background: rgba(138, 155, 176, 0.3);
+}
+
+.chart-legend__key[data-swatch='anomaly'] {
+  background: rgba(251, 140, 60, 0.22);
+  border-top: 2px solid var(--sev-high);
+}
+
+.chart-legend__key[data-swatch='event'] {
+  background: rgba(138, 155, 176, 0.16);
+  border: 1px solid rgba(138, 155, 176, 0.5);
+}
+
+.chart__plot {
+  position: relative;
+  width: 100%;
+  min-width: 0;
+  border-radius: var(--radius-sm);
+  cursor: crosshair;
+}
+
+.chart__plot:focus-visible {
+  outline: none;
+  box-shadow: var(--focus-ring);
+}
+
+.chart__svg {
+  display: block;
+  overflow: visible;
+}
+
+.chart__svg text {
+  font-family: var(--font-sans);
+  font-size: 12px;
+  fill: var(--muted);
+  font-variant-numeric: tabular-nums;
+}
+
+.chart__grid line,
+.chart__baseline,
+.chart__tickmark {
+  stroke: var(--line);
+  stroke-width: 1;
+  shape-rendering: crispEdges;
+}
+
+.chart__observed {
+  fill: none;
+  stroke: var(--accent);
+  stroke-width: 2;
+  stroke-linejoin: round;
+  stroke-linecap: round;
+}
+
+.chart--compact .chart__observed,
+.chart--spark .chart__observed {
+  stroke-width: 1.5;
+}
+
+.chart__expected {
+  fill: none;
+  stroke: var(--muted);
+  stroke-width: 1.25;
+  stroke-linejoin: round;
+  stroke-linecap: round;
+}
+
+.chart__band {
+  fill: var(--muted);
+  fill-opacity: 0.16;
+  stroke: none;
+}
+
+.chart__window[data-tone='event'] {
+  fill: var(--muted);
+  fill-opacity: 0.13;
+}
+
+.chart__window[data-tone='anomaly'] {
+  fill: var(--sev-medium);
+  fill-opacity: 0.1;
+}
+
+.chart__window[data-severity='low'],
+.chart__window-rule[data-severity='low'] { fill: var(--sev-low); }
+.chart__window[data-severity='medium'],
+.chart__window-rule[data-severity='medium'] { fill: var(--sev-medium); }
+.chart__window[data-severity='high'],
+.chart__window-rule[data-severity='high'] { fill: var(--sev-high); }
+.chart__window[data-severity='critical'],
+.chart__window-rule[data-severity='critical'] { fill: var(--sev-critical); }
+
+.chart__window[data-emphasised='true'] {
+  fill-opacity: 0.16;
+}
+
+.chart__window-rule {
+  fill-opacity: 0.95;
+}
+
+.chart__ref {
+  stroke-width: 1;
+  shape-rendering: crispEdges;
+  stroke: var(--muted);
+}
+
+.chart__ref[data-tone='warn'] { stroke: var(--status-watch); }
+.chart__ref[data-tone='crit'] { stroke: var(--status-critical); }
+
+.chart__svg text.chart__ref-label {
+  fill: var(--text);
+  paint-order: stroke;
+  stroke: var(--card);
+  stroke-width: 3px;
+  stroke-linejoin: round;
+}
+
+.chart__cursor {
+  stroke: var(--text);
+  stroke-width: 1;
+  shape-rendering: crispEdges;
+}
+
+.chart__crosshair {
+  stroke: var(--muted);
+  stroke-width: 1;
+  shape-rendering: crispEdges;
+  pointer-events: none;
+}
+
+.chart__dot {
+  fill: var(--accent);
+  stroke: var(--card);
+  stroke-width: 2;
+  pointer-events: none;
+}
+
+.chart__tooltip {
+  position: absolute;
+  top: 4px;
+  z-index: 3;
+  min-width: 150px;
+  max-width: 230px;
+  padding: 6px 8px;
+  background: var(--overlay);
+  border: 1px solid var(--line);
+  border-radius: var(--radius-sm);
+  box-shadow: var(--shadow);
+  font-size: var(--fs-min);
+  pointer-events: none;
+}
+
+.chart__tooltip-title {
+  font-weight: 600;
+  margin-bottom: 4px;
+}
+
+.chart__tooltip-rows {
+  display: grid;
+  grid-template-columns: max-content minmax(0, 1fr);
+  gap: 1px 8px;
+  font-variant-numeric: tabular-nums;
+}
+
+.chart__tooltip-value {
+  text-align: right;
+}
+
+.chart__tooltip-value.is-strong {
+  font-weight: 700;
+}
+
+.chart__tooltip-label {
+  color: var(--muted);
+}
+
+.chart__tooltip-note {
+  margin-top: 4px;
+  padding-top: 4px;
+  border-top: 1px solid var(--line);
+  color: var(--muted);
+}
+
+.chart__empty {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 72px;
+  border: 1px dashed var(--line);
+  border-radius: var(--radius-sm);
+  font-size: var(--fs-min);
+  color: var(--muted);
+}
+
+.chart__table {
+  max-height: 240px;
+  overflow: auto;
+}
+
+.chart__table .data-table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.chart__table thead th {
+  position: sticky;
+  top: 0;
+  background: var(--card);
+}
+
+.chart__table tbody th {
+  font-weight: 400;
+  color: var(--text);
+  white-space: nowrap;
+}
+
+.chart__table tr.is-current th,
+.chart__table tr.is-current td {
+  background: var(--accent-soft);
+}
+
+@media (forced-colors: active) {
+  .chart__observed { stroke: CanvasText; }
+  .chart__expected { stroke: GrayText; }
+  .chart__cursor { stroke: Highlight; }
+}

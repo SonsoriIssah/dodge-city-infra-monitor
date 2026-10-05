@@ -1,0 +1,11 @@
+{
+  "source_id": "usgs_3dep",
+  "url": "https://planetarycomputer.microsoft.com/api/stac/v1/collections/3dep-lidar-dsm",
+  "retrieved_at": "2026-10-04T11:59:36Z",
+  "license": "US public domain (U.S. Geological Survey 3D Elevation Program data); rasters hosted by Microsoft Planetary Computer",
+  "attribution_text": "U.S. Geological Survey, 3D Elevation Program",
+  "vintage": "USGS_LPC_KS_Area1_2014_LAS_2015: lidar collected 2013-12-12 to 2014-01-22 (2 m rasters)",
+  "n_buildings": 424,
+  "n_footprints_total": 485,
+  "method": "Per OSM building footprint (closed way with a building tag): 90th percentile of height above ground over the 2 m raster pixels whose centre lies inside the footprint; at least 4 valid pixels required; values outside 2.5-60 m discarded; rounded to 0.1 m. Height above ground = digital surface model minus digital terrain model from the lidar vendor's ground classification (STAC collections 3dep-lidar-dsm and 3dep-lidar-dtm-native; terrain gaps beneath roofs interpolated from the surrounding ground), derived from USGS 3DEP lidar and hosted by the Microsoft Planetary Computer. Footprints without a usable measurement have no row. Produced by tools/derive_building_heights.py --surface ndsm (rasterio 1.5.2, GDAL 3.12.2)."
+}

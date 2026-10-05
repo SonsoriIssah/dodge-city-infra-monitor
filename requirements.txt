@@ -1,0 +1,12 @@
+# Runtime dependencies (pipeline + API). Install with:
+#   pip install -r requirements.txt && pip install -e . --no-deps
+# GIS processing is pure Python by design: no pandas, shapely, GDAL or geopandas in the application environment.
+fastapi>=0.115,<1.0
+uvicorn[standard]>=0.30,<1.0
+psycopg[binary,pool]>=3.2,<4.0
+pydantic>=2.7,<3.0
+pydantic-settings>=2.3,<3.0
+numpy>=1.26,<3.0
+scikit-learn>=1.4,<2.0
+httpx>=0.27,<1.0
+tzdata>=2024.1

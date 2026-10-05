@@ -1,0 +1,82 @@
+/*
+ * Design tokens. The colour values are mirrored one to one in js/ui/tokens.js (MapLibre paint expressions and
+ * canvas drawing cannot read custom properties) - change both files together. Build contract 12.6.
+ */
+:root {
+  color-scheme: dark;
+
+  /* Surfaces */
+  --bg: #0b1016;
+  --panel: #111821;
+  --card: #151e29;
+  --line: #233142;
+  --text: #e6edf5;
+  --muted: #8a9bb0;
+  --accent: #38bdf8;
+
+  /* Derived Asset Health Score bands (asset status) */
+  --status-normal: #2dd4bf;
+  --status-watch: #f5b942;
+  --status-at-risk: #fb8c3c;
+  --status-critical: #ef5a45;
+  --status-not-monitored: #2f3b4a;
+
+  /* Sensor status */
+  --sensor-normal: #2dd4bf;
+  --sensor-warning: #f5b942;
+  --sensor-anomaly: #ef5a45;
+  --sensor-offline: #64748b;
+
+  /* Anomaly severity; risk levels use the same ramp */
+  --sev-low: #8fb8de;
+  --sev-medium: #f5b942;
+  --sev-high: #fb8c3c;
+  --sev-critical: #ef5a45;
+  --risk-low: var(--sev-low);
+  --risk-moderate: var(--sev-medium);
+  --risk-high: var(--sev-high);
+  --risk-very-high: var(--sev-critical);
+
+  /* Context-only line and point assets (rail, power, street lights) */
+  --context-feature: #6b7c93;
+
+  /* Derived surfaces */
+  --card-hover: #1b2735;
+  --inset: #0e151d;
+  --overlay: rgba(17, 24, 33, 0.94);
+  --scrim: rgba(5, 8, 12, 0.72);
+  --accent-soft: rgba(56, 189, 248, 0.14);
+  --accent-line: rgba(56, 189, 248, 0.55);
+
+  /* Typography: system fonts only (no web fonts) */
+  --font-sans: Inter, "Segoe UI", system-ui, sans-serif;
+  --font-mono: ui-monospace, "Cascadia Mono", Consolas, monospace;
+  --fs-min: 12px;
+  --fs-body: 13px;
+  --fs-title: 15px;
+  --fs-kpi: 22px;
+
+  /* Geometry (build contract 12.2) */
+  --header-h: 44px;
+  --kpi-h: 52px;
+  --timeline-h: 64px;
+  --panel-w: 340px;
+  --radius: 10px;
+  --radius-sm: 6px;
+  --gap: 8px;
+  --pad: 12px;
+  --focus-ring: 0 0 0 2px var(--bg), 0 0 0 4px var(--accent);
+  --shadow: 0 8px 28px rgba(0, 0, 0, 0.45);
+}
+
+@media (min-width: 1600px) {
+  :root {
+    --panel-w: 380px;
+  }
+}
+
+@media (max-width: 1279px) {
+  :root {
+    --panel-w: 300px;
+  }
+}

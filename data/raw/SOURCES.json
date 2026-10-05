@@ -1,0 +1,53 @@
+{
+  "description": "Provenance of the files in data/raw (written by scripts/download_data.py). The cached files are the reproducible artefact: the upstream services change over time.",
+  "sources": [
+    {
+      "source_id": "osm",
+      "file": "osm.json",
+      "url": "https://overpass-api.de/api/interpreter",
+      "retrieved_at": "2026-10-04T12:00:24Z",
+      "sha256": "1a9fdc27149c3ebaf905527a9718291616ad7f5960524d740498134be12fbdcd",
+      "feature_count": 896,
+      "license": "Open Database License (ODbL) 1.0 - https://opendatacommons.org/licenses/odbl/1-0/",
+      "attribution_text": "Contains OpenStreetMap data © OpenStreetMap contributors, available under the Open Database License (https://opendatacommons.org/licenses/odbl/1-0/)",
+      "vintage": "2026-10-04T11:58:25Z",
+      "terms_url": "https://www.openstreetmap.org/copyright"
+    },
+    {
+      "source_id": "nbi",
+      "file": "nbi_bridges.json",
+      "url": "https://services.arcgis.com/xOi1kZaI0eWDREZv/arcgis/rest/services/NTAD_National_Bridge_Inventory/FeatureServer/0/query?where=1%3D1&geometry=-100.03%2C37.745%2C-100.005%2C37.762&geometryType=esriGeometryEnvelope&inSR=4326&spatialRel=esriSpatialRelIntersects&outFields=%2A&outSR=4326&f=json",
+      "retrieved_at": "2026-10-04T12:00:28Z",
+      "sha256": "c66998088c757b2909d97159e558afee670d34bbb721520fb7fb20bede920e7a",
+      "feature_count": 4,
+      "license": "US Government work, unrestricted public use",
+      "attribution_text": "FHWA National Bridge Inventory (data as of June 20, 2025), distributed by USDOT/BTS NTAD",
+      "vintage": "data as of June 20, 2025",
+      "terms_url": "https://www.arcgis.com/home/item.html?id=bd1b6ee967134ea68fac351cef461b5e"
+    },
+    {
+      "source_id": "tiger",
+      "file": "city_boundary.geojson",
+      "url": "https://tigerweb.geo.census.gov/arcgis/rest/services/TIGERweb/Places_CouSub_ConCity_SubMCD/MapServer/4/query?outFields=%2A&outSR=4326&f=geojson&where=GEOID%3D%272018250%27",
+      "retrieved_at": "2026-10-04T12:00:30Z",
+      "sha256": "e5f50b4da3d13c0f335126cbf8a55a92cf8696ecc1ba4599e58d7e19a1f0debf",
+      "feature_count": 1,
+      "license": "US Government work, not subject to copyright; cite the U.S. Census Bureau",
+      "attribution_text": "U.S. Census Bureau, TIGERweb",
+      "vintage": "Incorporated Places; January 1, 2026 vintage",
+      "terms_url": "https://www2.census.gov/geo/pdfs/maps-data/data/tiger/tgrshp2025/TGRSHP2025_TechDoc_Ch1.pdf"
+    },
+    {
+      "source_id": "usgs_3dep",
+      "file": "building_heights_3dep.csv",
+      "url": "https://planetarycomputer.microsoft.com/api/stac/v1/collections/3dep-lidar-dsm",
+      "retrieved_at": "2026-10-04T11:59:36Z",
+      "sha256": "edd859f02e230a04288f10dd97c0fe5e5cca9b20fc5c39be19f42dc3c0021add",
+      "feature_count": 424,
+      "license": "US public domain (U.S. Geological Survey 3D Elevation Program data); rasters hosted by Microsoft Planetary Computer",
+      "attribution_text": "U.S. Geological Survey, 3D Elevation Program",
+      "vintage": "USGS_LPC_KS_Area1_2014_LAS_2015: lidar collected 2013-12-12 to 2014-01-22 (2 m rasters)",
+      "terms_url": "https://www.usgs.gov/information-policies-and-instructions/copyrights-and-credits"
+    }
+  ]
+}
